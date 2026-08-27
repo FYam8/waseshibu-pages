@@ -1,0 +1,9 @@
+{
+  "contentVersion": "v1-a78798379af3eb1d",
+  "problemManifestAad": "problem-manifest:v1-a78798379af3eb1d",
+  "answerManifestAad": "answer-manifest:v1-a78798379af3eb1d",
+  "problemManifestSha256": "abbd211e5af8eac3ed670cbfa728edfec7032ae9d588451888a17ee841fab7d6",
+  "answerManifestSha256": "75a94c3be43ed1204f34994795343d05962bb2c5ae2b55eb2a8d35360d6e85ea",
+  "scoringSha256": "549cf6d44edae7a5fae91213cee3c0e07f09e9cd03d6e67ca90a1c04d60a8467",
+  "gradingSha256": "2fe408eb02021f98fb0a7abcd3634c8c2da140ee3150cac48a3a2f0eae298eea"
+}
