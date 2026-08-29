@@ -1,6 +1,6 @@
 {
-  "name": "早稲渋 国語 60→75",
-  "short_name": "早稲渋国語",
+  "name": "国語 60→75",
+  "short_name": "国語60→75",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f5f7fa",
