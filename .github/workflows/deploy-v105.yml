@@ -1,0 +1,53 @@
+name: Deploy kokugo v1.0.5
+
+on:
+  push:
+    branches: ["deploy-v1.0.5-20260901"]
+    paths:
+      - ".github/workflows/deploy-v105.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore safe build source
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/kokugo-src
+          cat deploy-v105/chunk*.txt | base64 -d | tar -xzf - -C /tmp/kokugo-src
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build v1.0.5
+        working-directory: /tmp/kokugo-src
+        run: |
+          set -euo pipefail
+          npm install
+          npm run build
+          grep -R "1.0.5-waseshibu-extended-drills" dist/assets/*.js
+
+      - name: Deploy to main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git clone --branch main "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" /tmp/publish
+          cp -a /tmp/kokugo-src/dist/. /tmp/publish/
+          touch /tmp/publish/.nojekyll
+          cd /tmp/publish
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No publish changes"
+            exit 0
+          fi
+          git commit -m "deploy: kokugo v1.0.5"
+          git push origin main
