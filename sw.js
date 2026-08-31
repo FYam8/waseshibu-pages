@@ -1,4 +1,4 @@
-const CACHE = 'waseshibu-shell-v2';
+const CACHE = 'waseshibu-shell-v3';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
@@ -15,7 +15,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Exam/answer ciphertext must never be persisted by the Service Worker.
+  // Problem/answer assets are intentionally not persisted by the Service Worker.
   if (url.pathname.includes('/content/')) return;
   if (event.request.method !== 'GET') return;
 
