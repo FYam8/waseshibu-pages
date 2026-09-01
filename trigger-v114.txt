@@ -1,1 +1,1 @@
-Deploy kokugo v1.1.4 from validated candidate.
+Deploy kokugo v1.1.4 retry with verified binary chunks.
