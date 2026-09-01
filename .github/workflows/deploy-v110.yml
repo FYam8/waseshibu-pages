@@ -17,21 +17,52 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Restore and sanitize v1.1.0 source
+      - name: Restore and validate v1.1.0 source
         run: |
           set -euo pipefail
           git fetch origin deploy-v1.1.0-20260831
           mkdir -p /tmp/kokugo-src /tmp/v110-chunks
           git archive origin/deploy-v1.1.0-20260831 deploy-v110 | tar -x -C /tmp/v110-chunks
-          : > /tmp/v110-source.tar.gz
-          for f in /tmp/v110-chunks/deploy-v110/chunk*.txt; do
-            tr -cd 'A-Za-z0-9+/=' < "$f" | base64 -d >> /tmp/v110-source.tar.gz
-          done
-          tar -tzf /tmp/v110-source.tar.gz >/dev/null
-          tar -xzf /tmp/v110-source.tar.gz -C /tmp/kokugo-src
-          node -e "const p=require('/tmp/kokugo-src/package.json'); if(p.version!=='1.1.0') throw new Error('wrong version '+p.version)"
-          grep -q "1.1.0-source-specific-reviews" /tmp/kokugo-src/src/main.jsx
-          test -f /tmp/kokugo-src/src/reviewProfiles.js
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, gzip, io, re, shutil, tarfile, json
+          root=Path('/tmp/v110-chunks/deploy-v110')
+          chunks=[]
+          for p in sorted(root.glob('chunk*.txt')):
+              s=re.sub(r'[^A-Za-z0-9+/=]','',p.read_text())
+              print(p.name, len(s))
+              chunks.append((p.name,s))
+          idx=next(i for i,(n,_) in enumerate(chunks) if n=='chunk07.txt')
+          original=chunks[idx][1]
+          candidates=[('drop-last', original[:-1]), ('drop-first', original[1:])]
+          for label,c7 in candidates:
+              parts=[s for _,s in chunks]
+              parts[idx]=c7
+              s=''.join(parts)
+              try:
+                  data=base64.b64decode(s, validate=True)
+                  with gzip.GzipFile(fileobj=io.BytesIO(data)) as gz:
+                      tarbytes=gz.read()
+                  with tarfile.open(fileobj=io.BytesIO(tarbytes),mode='r:') as tf:
+                      names=tf.getnames()
+                      pkg_member=next(n for n in names if n.rstrip('/').endswith('package.json'))
+                      pkg=json.load(tf.extractfile(pkg_member))
+                      main_member=next(n for n in names if n.rstrip('/').endswith('src/main.jsx'))
+                      main=tf.extractfile(main_member).read().decode('utf-8')
+                      profile_ok=any(n.rstrip('/').endswith('src/reviewProfiles.js') for n in names)
+                      if pkg.get('version')!='1.1.0' or '1.1.0-source-specific-reviews' not in main or not profile_ok:
+                          raise RuntimeError('semantic validation failed')
+                      out=Path('/tmp/kokugo-src')
+                      shutil.rmtree(out,ignore_errors=True); out.mkdir()
+                      tf.extractall(out)
+                  Path('/tmp/v110-source.tar.gz').write_bytes(data)
+                  print('selected repair:',label)
+                  break
+              except Exception as e:
+                  print(label,'failed:',repr(e))
+          else:
+              raise SystemExit('no boundary repair produced a valid v1.1.0 source archive')
+          PY
 
       - uses: actions/setup-node@v4
         with:
