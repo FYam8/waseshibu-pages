@@ -1,1 +1,1 @@
-Deploy kokugo v1.1.0 from validated Library artifact. Retry with per-chunk decode.
+Deploy kokugo v1.1.0 from validated Library artifact. Retry boundary repair validation.
