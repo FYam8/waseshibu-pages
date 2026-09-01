@@ -1,1 +1,1 @@
-Deploy kokugo v1.1.4 priority-flow final from validated candidate.
+Deploy kokugo v1.1.4 priority-flow final from validated candidate. Retry after build-verification fix.
