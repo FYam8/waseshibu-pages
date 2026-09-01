@@ -93,10 +93,11 @@ jobs:
       - name: Apply and validate v1.1.4 patch
         run: |
           set -euo pipefail
-          git fetch origin deploy-v1.1.4-patch
+          git fetch origin deploy-v1.1.4-patch2
           rm -rf /tmp/v114-stage; mkdir -p /tmp/v114-stage
-          git archive origin/deploy-v1.1.4-patch deploy-v114/v114-runtime-patch.tar.gz | tar -x -C /tmp/v114-stage
-          cp /tmp/v114-stage/deploy-v114/v114-runtime-patch.tar.gz /tmp/v114-runtime-patch.tar.gz
+          git archive origin/deploy-v1.1.4-patch2 deploy-v114r | tar -x -C /tmp/v114-stage
+          d=/tmp/v114-stage/deploy-v114r
+          cat "$d/chunk00.bin" "$d/chunk01.bin" "$d/chunk02.bin" "$d/chunk03.bin" > /tmp/v114-runtime-patch.tar.gz
           echo '693aa48637cea9678b85a71e69577e618a5dfd8e2b5a788ff111a0516bc786cd  /tmp/v114-runtime-patch.tar.gz' | sha256sum -c -
           tar -tzf /tmp/v114-runtime-patch.tar.gz >/dev/null
           tar -xzf /tmp/v114-runtime-patch.tar.gz -C /tmp/kokugo-src --strip-components=1
