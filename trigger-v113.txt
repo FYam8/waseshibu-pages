@@ -1,0 +1,1 @@
+Deploy kokugo v1.1.3 from validated publish candidate.
