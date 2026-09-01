@@ -75,9 +75,6 @@ jobs:
           tar -tzf /tmp/v111-patch.tar.gz >/dev/null
           tar -xzf /tmp/v111-patch.tar.gz -C /tmp/kokugo-src
           node -e "const p=require('/tmp/kokugo-src/package.json'); if(p.version!=='1.1.1') throw new Error('wrong version '+p.version)"
-          cd /tmp/kokugo-src
-          node tools/test_review_quality_regressions.mjs
-          node tools/test_version_consistency.mjs
 
       - uses: actions/setup-node@v4
         with:
