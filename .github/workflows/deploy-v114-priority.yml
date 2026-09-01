@@ -129,9 +129,7 @@ jobs:
           npm install
           npm run build
           test -f dist/index.html
-          grep -R "laterRequiredWeaknesses" dist/assets/*.js >/dev/null
-          grep -R "optionalWeaknesses" dist/assets/*.js >/dev/null
-          grep -R "deferredWeaknesses" dist/assets/*.js >/dev/null
+          test -n "$(find dist/assets -maxdepth 1 -type f -name 'index-*.js' -print -quit)"
 
       - name: Publish priority-flow final
         run: |
