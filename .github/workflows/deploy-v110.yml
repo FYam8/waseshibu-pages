@@ -1,0 +1,58 @@
+name: Deploy kokugo v1.1.0
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "trigger-v110.txt"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore and sanitize v1.1.0 source
+        run: |
+          set -euo pipefail
+          git fetch origin deploy-v1.1.0-20260831
+          mkdir -p /tmp/kokugo-src /tmp/v110-chunks
+          git archive origin/deploy-v1.1.0-20260831 deploy-v110 | tar -x -C /tmp/v110-chunks
+          cat /tmp/v110-chunks/deploy-v110/chunk*.txt | tr -cd 'A-Za-z0-9+/=' | base64 -d > /tmp/v110-source.tar.gz
+          tar -tzf /tmp/v110-source.tar.gz >/dev/null
+          tar -xzf /tmp/v110-source.tar.gz -C /tmp/kokugo-src
+          node -e "const p=require('/tmp/kokugo-src/package.json'); if(p.version!=='1.1.0') throw new Error('wrong version '+p.version)"
+          grep -q "1.1.0-source-specific-reviews" /tmp/kokugo-src/src/main.jsx
+          test -f /tmp/kokugo-src/src/reviewProfiles.js
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build and verify v1.1.0
+        working-directory: /tmp/kokugo-src
+        run: |
+          set -euo pipefail
+          npm install
+          npm run build
+          grep -R "1.1.0-source-specific-reviews" dist/assets/*.js
+
+      - name: Publish v1.1.0 over current site
+        run: |
+          set -euo pipefail
+          cp -a /tmp/kokugo-src/dist/. .
+          touch .nojekyll
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No publish changes"
+            exit 0
+          fi
+          git commit -m "deploy: kokugo v1.1.0"
+          git push origin main
