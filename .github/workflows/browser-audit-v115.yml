@@ -1,0 +1,159 @@
+name: Post-deploy browser audit kokugo v1.1.5
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "browser-audit-v115-trigger.txt"
+
+permissions:
+  contents: read
+
+jobs:
+  real-browser-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Real Chromium audit against public GitHub Pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/v115-browser
+          cd /tmp/v115-browser
+          npm init -y >/dev/null 2>&1
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -n "$CHROME_BIN" ]; then
+            npm install --no-audit --no-fund playwright-core@1.55.0 >/dev/null
+            export PW_PKG=playwright-core
+            export CHROME_BIN
+          else
+            npm install --no-audit --no-fund playwright@1.55.0 >/dev/null
+            npx playwright install chromium
+            export PW_PKG=playwright
+          fi
+          cat > audit.cjs <<'NODE'
+          const assert = require('node:assert/strict');
+          const { chromium } = require(process.env.PW_PKG || 'playwright-core');
+
+          async function idbCount(page, store) {
+            return page.evaluate(async (storeName) => new Promise((resolve, reject) => {
+              const req = indexedDB.open('waseshibu-kokugo');
+              req.onerror = () => reject(req.error);
+              req.onsuccess = () => {
+                const db = req.result;
+                const tx = db.transaction(storeName, 'readonly');
+                const c = tx.objectStore(storeName).count();
+                c.onsuccess = () => { const n=c.result; db.close(); resolve(n); };
+                c.onerror = () => { db.close(); reject(c.error); };
+              };
+            }), store);
+          }
+
+          (async () => {
+            const launch = { headless: true, args: ['--no-sandbox','--disable-dev-shm-usage'] };
+            if (process.env.CHROME_BIN) launch.executablePath = process.env.CHROME_BIN;
+            const browser = await chromium.launch(launch);
+            const context = await browser.newContext({ serviceWorkers: 'allow' });
+            const page = await context.newPage();
+            const pageErrors=[];
+            page.on('pageerror', e => pageErrors.push(String(e)));
+            page.on('dialog', async d => { await d.accept(); });
+
+            const url = 'https://fyam8.github.io/waseshibu-pages/?browserAudit=v115-' + Date.now();
+            await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 90000 });
+            await page.getByRole('heading', { name: '早稲渋 国語' }).waitFor({ state: 'visible', timeout: 90000 });
+
+            const scriptSrc = await page.locator('script[type="module"][src]').first().getAttribute('src');
+            assert.ok(scriptSrc, 'production module bundle src missing');
+            const bundleHasV115 = await page.evaluate(async (src) => {
+              const r = await fetch(src, { cache: 'no-store' });
+              const t = await r.text();
+              return t.includes('1.1.5-specific-explanations');
+            }, scriptSrc);
+            assert.equal(bundleHasV115, true, 'live bundle is not v1.1.5');
+
+            const dbNames = await page.evaluate(async () => (await indexedDB.databases()).map(x => x.name));
+            assert.ok(dbNames.includes('waseshibu-kokugo'), 'expected stable IndexedDB waseshibu-kokugo');
+
+            await page.locator('details.paperLibrary > summary').click();
+            const row2023 = page.locator('.paperRow').filter({ hasText: '2023年度' });
+            await row2023.waitFor({ state: 'visible', timeout: 30000 });
+            await row2023.getByRole('button').first().click();
+            await page.locator('.examIdentity b').filter({ hasText: '2023年度' }).waitFor({ state: 'visible', timeout: 60000 });
+
+            const badge = (await page.locator('.activeQuestion .answerBadge').innerText()).trim();
+            assert.equal(badge, '未回答', '2023 Q1 should start unanswered');
+            const selectedCount = await page.locator('.activeQuestion .kanaPad button.selected').count();
+            assert.equal(selectedCount, 0, 'a choice was preselected on unanswered Q1');
+            const aButton = page.locator('.activeQuestion .kanaPad button').filter({ hasText: /^ア$/ }).first();
+            assert.equal(await aButton.count(), 1, 'ア button not found on Q1');
+            const aClass = (await aButton.getAttribute('class')) || '';
+            assert.ok(!aClass.split(/\s+/).includes('selected'), 'ア was incorrectly selected by default');
+            const slots = await page.locator('.activeQuestion .partSlot b').allInnerTexts();
+            assert.ok(slots.length >= 1 && slots.every(x => x.trim() === '—'), 'unanswered part slots were not blank');
+
+            await page.getByRole('button', { name: '終了して採点' }).click();
+            await page.getByRole('heading', { name: '2023年度 採点' }).waitFor({ state: 'visible', timeout: 90000 });
+            const manualInputs = page.locator('.grading input[type="number"]');
+            const manualCount = await manualInputs.count();
+            assert.ok(manualCount > 0, 'expected manual-score inputs');
+            for (let i=0; i<manualCount; i++) await manualInputs.nth(i).fill('0');
+            await page.getByRole('button', { name: '採点を確定して端末に保存' }).click();
+            await page.getByRole('heading', { name: '復習優先度' }).waitFor({ state: 'visible', timeout: 90000 });
+
+            const weaknessText = (await page.locator('.weaknessCountLine').innerText()).replace(/\s+/g,'');
+            const wm = weaknessText.match(/今回見つかった弱点：(\d+).*まず直す：(\d+).*A\/B補強対象：(\d+).*C\/D保存：(\d+)/);
+            assert.ok(wm, 'weakness summary format missing: '+weaknessText);
+            const weaknessTotal=Number(wm[1]), firstBatch=Number(wm[2]), required=Number(wm[3]), storedCD=Number(wm[4]);
+            assert.ok(weaknessTotal > 3, `expected >3 weaknesses in all-zero 2023 audit, got ${weaknessTotal}`);
+            assert.equal(firstBatch, Math.min(3, required), 'first batch is not a 3-item presentation unit');
+            assert.equal(required + storedCD, weaknessTotal, 'not all weaknesses are represented in A/B + C/D');
+
+            await page.locator('details').evaluateAll(ds => ds.forEach(d => d.open=true));
+            const q1 = page.locator('details.reviewCard').filter({ has: page.locator('summary').filter({ hasText: '大問1 問1' }) }).first();
+            assert.equal(await q1.count(), 1, '2023 大問1 問1 review card missing');
+            const q1Text = await q1.locator('.reviewBody').innerText();
+            for (const term of ['挙げる','一貫','町を挙げて','凧揚げ＝揚','突貫＝貫']) {
+              assert.ok(q1Text.includes(term), `2023-1-1 concrete explanation missing: ${term}`);
+            }
+
+            const eventsBeforeReload = await idbCount(page, 'events');
+            assert.ok(eventsBeforeReload >= 2, 'exam claim/completion did not persist to IndexedDB');
+            await page.getByRole('button', { name: 'ホームへ戻る' }).click();
+            await page.getByRole('heading', { name: '早稲渋 国語' }).waitFor({ state: 'visible', timeout: 60000 });
+            const focusText = await page.locator('.focusPanel').innerText();
+            assert.ok(focusText.includes(`見つかった弱点 ${weaknessTotal}`), 'home did not retain all discovered weaknesses');
+            assert.ok(focusText.includes('診断は全弱点を保存します。A/Bは3件ずつ着手し、終わるたび次のA/Bが自動で繰り上がります。'), 'promotion/non-truncation guidance missing');
+            if (required > 3) {
+              const later = required - 3;
+              assert.ok(focusText.includes(`次に補強するA/B（${later}件）`), `later A/B weaknesses not shown (${later})`);
+              assert.ok(focusText.includes('今の3件が終わると自動で繰り上がります。'), 'A/B promotion message missing');
+            }
+
+            await page.reload({ waitUntil: 'domcontentloaded', timeout: 90000 });
+            await page.getByRole('heading', { name: '早稲渋 国語' }).waitFor({ state: 'visible', timeout: 90000 });
+            const eventsAfterReload = await idbCount(page, 'events');
+            assert.equal(eventsAfterReload, eventsBeforeReload, 'IndexedDB event count changed/lost across reload');
+            const homeAfterReload = await page.locator('.focusPanel').innerText();
+            assert.ok(homeAfterReload.includes(`見つかった弱点 ${weaknessTotal}`), 'weakness history disappeared after reload');
+
+            await page.getByRole('button', { name: '設定' }).click();
+            await page.getByRole('button', { name: '学習データを書き出す' }).waitFor({ state: 'visible' });
+            assert.equal(await page.getByText('学習データを読み込む', { exact: true }).count(), 1, 'import UI missing');
+            assert.deepEqual(pageErrors, [], 'browser page errors: '+pageErrors.join(' | '));
+
+            console.log(JSON.stringify({
+              status:'PASS',
+              publicUrl:url,
+              liveBundle:'v1.1.5-specific-explanations',
+              indexedDb:'waseshibu-kokugo',
+              unansweredQ1:{badge,selectedCount,aSelected:false,slots},
+              weakness:{total:weaknessTotal,firstBatch,required,storedCD,laterRequired:Math.max(0,required-3)},
+              q2023_1_1:['挙げる','一貫','町を挙げて','凧揚げ＝揚','突貫＝貫'],
+              persistence:{eventsBeforeReload,eventsAfterReload},
+              exportImportUi:true,
+              pageErrors:0
+            }, null, 2));
+            await browser.close();
+          })().catch(async e => { console.error(e.stack || e); process.exit(1); });
+          NODE
+          node audit.cjs
