@@ -1,0 +1,2 @@
+Run post-deploy real-browser audit for kokugo v1.1.5
+Target: https://fyam8.github.io/waseshibu-pages/
