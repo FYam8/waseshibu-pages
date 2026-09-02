@@ -1,1 +1,0 @@
-Deploy kokugo v1.1.4 retry with verified binary chunks.
