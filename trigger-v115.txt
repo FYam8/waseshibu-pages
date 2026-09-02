@@ -1,2 +1,3 @@
 Deploy kokugo v1.1.5 specific explanations candidate
 Source ZIP SHA-256: c9ab1dd49a35e9d96004f4acd5e8caa820d92cd72448916312bce9700cd58763
+Retry: corrected reconstructed-source CI checks
