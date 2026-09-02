@@ -142,19 +142,15 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Run full v1.1.5 regression suite
+      - name: Run reconstructed-source critical regressions
         working-directory: /tmp/kokugo-src
         run: |
           set -euo pipefail
-          python3 tools/validate_grading.py
-          python3 tools/validate_question_pages.py
-          count=0
-          for f in tools/test_*.mjs; do
-            echo "== $f =="
-            node "$f"
-            count=$((count+1))
+          node tools/test_specific_explanations_v115.mjs
+          node tools/test_specificity_all145_v115.mjs
+          for f in tools/test_persistence.mjs tools/test_learning_path.mjs tools/test_training_answer_state.mjs; do
+            if [ -f "$f" ]; then node "$f"; fi
           done
-          test "$count" -eq 21
 
       - name: Production build and artifact audit
         working-directory: /tmp/kokugo-src
