@@ -1,4 +1,4 @@
-const CACHE = 'waseshibu-shell-v14';
+const CACHE = 'waseshibu-shell-v15';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
