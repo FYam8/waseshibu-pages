@@ -1,25 +1,24 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "rules": {
     "officialAnswerMustBeHiddenFromModel": true,
     "evaluateAfterGeneration": true,
-    "contextMode": "official_pdf_full_passage"
+    "contextMode": "official_pdf_full_passage",
+    "repeatRuns": 3
   },
   "source": {
     "problemPdf": "https://www.waseda-shibuya.edu.sg/assets/upload/files/e84fc32c4eac71d3616a4743a3bf47eb1712047203.pdf",
-    "conversion": "cloudflare_to_markdown_runtime"
+    "conversion": "pdfjs_runtime"
   },
   "cases": [
     {
       "id": "2024-1-6",
       "points": 10,
       "maxChars": 40,
-      "passageLocator": {
-        "start": "一次の文章を読んで、後の問いに答えなさい。",
-        "end": "問一"
-      },
+      "passagePageIndexes": [3, 4, 5],
+      "questionPageIndex": 11,
       "questionLocator": {
-        "start": "問六筆者は",
+        "start": "問六",
         "end": "〈下書き用"
       }
     },
@@ -30,12 +29,10 @@
         {"id": "甲", "points": 5, "maxChars": 10},
         {"id": "乙", "points": 5, "maxChars": 10}
       ],
-      "passageLocator": {
-        "start": "二次の文章は、島尾敏雄",
-        "end": "問一"
-      },
+      "passagePageIndexes": [13, 14, 15, 16, 17, 18, 19],
+      "questionPageIndex": 25,
       "questionLocator": {
-        "start": "問六波線部",
+        "start": "問六",
         "end": "〈下書き用"
       },
       "layoutCaveat": "The official question uses a diagram. If text linearization appears to cause an error, rerun this case with visual input before judging model comprehension."
