@@ -133,16 +133,20 @@ function hardConstraintCheck(testCase, answer) {
   const text = String(answer ?? '').trim();
   if (testCase.maxChars) {
     const chars = codePointLength(text);
+    const found = text.length > 0;
+    const withinLimit = found && chars <= testCase.maxChars;
     return {
       kind: 'single',
+      found,
       charCount: chars,
       maxChars: testCase.maxChars,
-      withinLimit: chars <= testCase.maxChars,
+      withinLimit,
+      pass: found && withinLimit,
     };
   }
 
   if (Array.isArray(testCase.parts)) {
-    const out = { kind: 'parts', parts: {} };
+    const out = { kind: 'parts', parts: {}, pass: false };
     for (let index = 0; index < testCase.parts.length; index += 1) {
       const part = testCase.parts[index];
       const laterIds = testCase.parts
@@ -158,14 +162,20 @@ function hardConstraintCheck(testCase, answer) {
       const match = text.match(pattern);
       const value = match?.[1]?.trim() ?? null;
       const chars = value === null ? null : codePointLength(value);
+      const found = value !== null && value.length > 0;
+      const withinLimit = found && chars <= part.maxChars;
       out.parts[part.id] = {
         value,
         charCount: chars,
         maxChars: part.maxChars,
-        found: value !== null,
-        withinLimit: chars !== null ? chars <= part.maxChars : false,
+        found,
+        withinLimit,
       };
     }
+    out.pass = testCase.parts.every((part) => {
+      const checked = out.parts[part.id];
+      return checked?.found === true && checked?.withinLimit === true;
+    });
     return out;
   }
 
