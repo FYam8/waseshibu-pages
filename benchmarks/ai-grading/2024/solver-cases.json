@@ -38,7 +38,8 @@
       "questionLocator": {
         "start": "問六波線部",
         "end": "〈下書き用"
-      }
+      },
+      "layoutCaveat": "The official question uses a diagram. If text linearization appears to cause an error, rerun this case with visual input before judging model comprehension."
     }
   ]
 }
