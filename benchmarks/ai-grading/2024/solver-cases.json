@@ -3,8 +3,7 @@
   "rules": {
     "officialAnswerMustBeHiddenFromModel": true,
     "evaluateAfterGeneration": true,
-    "contextMode": "official_pdf_full_passage",
-    "repeatRuns": 3
+    "contextMode": "official_pdf_full_passage"
   },
   "source": {
     "problemPdf": "https://www.waseda-shibuya.edu.sg/assets/upload/files/e84fc32c4eac71d3616a4743a3bf47eb1712047203.pdf",
