@@ -13,7 +13,7 @@ const model = process.env.WORKERS_AI_MODEL || '@cf/google/gemma-4-26b-a4b-it';
 const repeatRuns = Number(process.env.BENCH_REPEAT || 3);
 const temperature = Number(process.env.BENCH_TEMPERATURE ?? 0);
 const fixedSeed = process.env.BENCH_SEED === undefined ? null : Number(process.env.BENCH_SEED);
-const thinking = process.env.BENCH_THINKING !== 'false';
+const thinking = process.env.BENCH_THINKING === 'true';
 const reasoningEffort = process.env.BENCH_REASONING_EFFORT || 'low';
 
 if (!accountId || !token) {
@@ -86,7 +86,7 @@ function renderPrompt({ passage, question }) {
   return promptTemplate.replace('{{PASSAGE}}', passage).replace('{{QUESTION}}', question);
 }
 function modelSpecificOptions() {
-  if (model === '@cf/google/gemma-4-26b-a4b-it') {
+  if (model === '@cf/google/gemma-4-26b-a4b-it' || model === '@cf/zai-org/glm-4.7-flash') {
     return { chat_template_kwargs: { enable_thinking: thinking } };
   }
   return {};
@@ -203,7 +203,7 @@ const report = {
   settings: {
     temperature,
     seed: fixedSeed,
-    thinking: model === '@cf/google/gemma-4-26b-a4b-it' ? thinking : null,
+    thinking: (model === '@cf/google/gemma-4-26b-a4b-it' || model === '@cf/zai-org/glm-4.7-flash') ? thinking : null,
     repeatRuns,
     reasoningEffort,
     maxCompletionTokens: 2048,
