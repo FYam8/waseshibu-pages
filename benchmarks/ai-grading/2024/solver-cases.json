@@ -1,9 +1,9 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "rules": {
     "officialAnswerMustBeHiddenFromModel": true,
     "evaluateAfterGeneration": true,
-    "contextMode": "q2_focused_excerpt_diagnostic",
+    "contextMode": "q1_full_passage_primary_diagnostic",
     "repeatRuns": 3,
     "diagnosticOnly": true
   },
@@ -13,20 +13,16 @@
   },
   "cases": [
     {
-      "id": "2024-2-6",
+      "id": "2024-1-6",
       "points": 10,
-      "parts": [
-        {"id": "甲", "points": 5, "maxChars": 10},
-        {"id": "乙", "points": 5, "maxChars": 10}
-      ],
-      "passagePageIndexes": [16, 17, 18],
-      "questionPageIndex": 25,
+      "maxChars": 40,
+      "passagePageIndexes": [3, 4, 5],
+      "questionPageIndex": 11,
       "questionLocator": {
         "start": "問六",
         "end": "〈下書き用"
       },
-      "diagnosticPurpose": "Determine whether the public Playground failure is caused by the full-passage input size. This excerpt contains the senior NCO conversation, the officer-responsibility statement, and the narrator's final decision.",
-      "layoutCaveat": "The official question uses a diagram. If focused text still fails, test the question layout separately before judging model comprehension."
+      "diagnosticPurpose": "Primary text-only comprehension test. This question does not depend on the diagram-layout issue present in 2024-2-6."
     }
   ]
 }
