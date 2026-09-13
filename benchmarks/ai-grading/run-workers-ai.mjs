@@ -18,8 +18,8 @@ if (!accountId || !token) {
   process.exit(2);
 }
 
-if (!Number.isFinite(repeatRuns) || repeatRuns < 1) {
-  throw new Error('BENCH_REPEAT must be a positive number.');
+if (!Number.isInteger(repeatRuns) || repeatRuns < 1) {
+  throw new Error('BENCH_REPEAT must be a positive integer.');
 }
 if (!Number.isFinite(temperature) || temperature < 0 || temperature > 2) {
   throw new Error('BENCH_TEMPERATURE must be between 0 and 2.');
@@ -125,6 +125,10 @@ function codePointLength(text) {
   return [...String(text ?? '').trim()].length;
 }
 
+function escapeRegExp(text) {
+  return String(text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function hardConstraintCheck(testCase, answer) {
   const text = String(answer ?? '').trim();
   if (testCase.maxChars) {
@@ -139,8 +143,18 @@ function hardConstraintCheck(testCase, answer) {
 
   if (Array.isArray(testCase.parts)) {
     const out = { kind: 'parts', parts: {} };
-    for (const part of testCase.parts) {
-      const pattern = new RegExp(`${part.id}\\s*[：:]\\s*([^\\n\\r]+)`);
+    for (let index = 0; index < testCase.parts.length; index += 1) {
+      const part = testCase.parts[index];
+      const laterIds = testCase.parts
+        .slice(index + 1)
+        .map((item) => escapeRegExp(item.id));
+      const stop = laterIds.length
+        ? `(?=\\s*(?:${laterIds.join('|')})\\s*[：:]|$)`
+        : '$';
+      const pattern = new RegExp(
+        `${escapeRegExp(part.id)}\\s*[：:]\\s*(.+?)${stop}`,
+        's',
+      );
       const match = text.match(pattern);
       const value = match?.[1]?.trim() ?? null;
       const chars = value === null ? null : codePointLength(value);
