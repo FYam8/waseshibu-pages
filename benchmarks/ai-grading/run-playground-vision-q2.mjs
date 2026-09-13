@@ -56,7 +56,6 @@ async function renderQuestionPage(pdfBytes) {
 function parseParts(answer) {
   const result = {};
   for (const [id, maxChars] of [['甲', 10], ['乙', 10]]) {
-    const other = id === '甲' ? '乙' : '$';
     const stop = id === '甲' ? '(?=\\s*乙\\s*[：:]|$)' : '$';
     const regex = new RegExp(`${id}\\s*[：:]\\s*(.+?)${stop}`, 's');
     const match = answer.match(regex);
@@ -81,11 +80,12 @@ function buildUserText(passage) {
 }
 
 const pdfBytes = await downloadPdf(PROBLEM_PDF);
+// Render before handing the Uint8Array to PDF.js. PDF.js may transfer/detach the source ArrayBuffer.
+const { png } = await renderQuestionPage(pdfBytes.slice());
 const pdf = await getDocument({ data: pdfBytes, disableWorker: true }).promise;
 const focusedPages = [];
 for (const pageIndex of [16, 17, 18]) focusedPages.push(await pageText(pdf, pageIndex));
 const passage = focusedPages.join('\n\n');
-const { png } = await renderQuestionPage(pdfBytes);
 const imageDataUrl = `data:image/png;base64,${png.toString('base64')}`;
 
 const browser = await chromium.launch({ headless: true });
@@ -124,7 +124,6 @@ async function runAttempt(runNo, technicalAttempt) {
       { timeout: 60_000 },
     );
 
-    const uiMessageId = crypto.randomUUID();
     const body = {
       messages: [{
         role: 'user',
@@ -132,7 +131,7 @@ async function runAttempt(runNo, technicalAttempt) {
           { type: 'text', text: buildUserText(passage) },
           { type: 'file', mediaType: 'image/png', filename: '2024-kokugo-q2-question.png', url: imageDataUrl },
         ],
-        id: uiMessageId,
+        id: crypto.randomUUID(),
       }],
       trigger: 'submit-message',
     };
