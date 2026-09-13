@@ -5,7 +5,8 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 
 const MODEL = '@cf/google/gemma-4-26b-a4b-it';
-const url = `https://playground.ai.cloudflare.com/?model=${encodeURIComponent(MODEL)}`;
+const homeUrl = `https://playground.ai.cloudflare.com/?model=${encodeURIComponent(MODEL)}`;
+const modelUrl = `https://playground.ai.cloudflare.com/models?model=${encodeURIComponent(MODEL)}`;
 const outDir = new URL('./results/', import.meta.url);
 await fs.mkdir(outDir, { recursive: true });
 
@@ -55,13 +56,14 @@ async function snapshot(name) {
 }
 
 try {
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-  await page.waitForTimeout(4_000);
+  await page.goto(homeUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+  await page.waitForTimeout(3_000);
   await snapshot('playground-home');
 
-  const modelMode = page.getByText('Model mode', { exact: true }).first();
-  await modelMode.click({ timeout: 15_000 });
-  await page.waitForTimeout(5_000);
+  // Use the public route exposed by the Playground itself. This avoids
+  // accidentally selecting a hidden duplicate sidebar label on the home page.
+  await page.goto(modelUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+  await page.waitForTimeout(6_000);
   await snapshot('playground-model-mode');
 
   console.log('--- DIAGNOSTICS ---');
