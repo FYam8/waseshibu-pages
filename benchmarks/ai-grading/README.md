@@ -39,7 +39,7 @@
 
 `run-workers-ai-grader.mjs` は全16答案を1回のリクエストへまとめ、本文全文とGold labelをモデルへ送らない。最初は3モデルを各1回だけ比較し、最良モデルが決まってからそのモデルだけ反復して再現性を測る。これにより、3モデルを最初から各3回実行する場合より推論量を抑える。
 
-GitHub Actionsでは `Kokugo AI grader benchmark (compact input)` を手動実行する。結果JSONにはモデルの判定、Gold labelとの一致数、利用量、プロンプト文字数を記録する。
+GitHub Actionsでは `Kokugo AI grader benchmark (compact input)` を実行する。結果JSONにはモデルの判定、Gold labelとの一致数、利用量、プロンプト文字数を記録する。
 
 ## なぜ全文脈を使うか
 

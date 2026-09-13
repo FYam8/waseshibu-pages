@@ -1,4 +1,4 @@
-name: Kokugo AI benchmark (authenticated API)
+name: Kokugo AI grader benchmark (compact input)
 
 on:
   workflow_dispatch:
@@ -6,9 +6,9 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/kokugo-ai-benchmark.yml'
-      - 'benchmarks/ai-grading/run-workers-ai.mjs'
-      - 'benchmarks/ai-grading/2024/solver-cases.json'
-      - 'benchmarks/ai-grading/prompts/solver-v1.txt'
+      - 'benchmarks/ai-grading/run-workers-ai-grader.mjs'
+      - 'benchmarks/ai-grading/2024/grader-cases.json'
+      - 'benchmarks/ai-grading/prompts/grader-v1.txt'
 
 permissions:
   contents: read
@@ -31,17 +31,15 @@ jobs:
       CLOUDFLARE_AUTH_TOKEN: ${{ secrets.CLOUDFLARE_AUTH_TOKEN }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       WORKERS_AI_MODEL: ${{ matrix.model }}
-      BENCH_REPEAT: '3'
+      BENCH_REPEAT: '1'
       BENCH_TEMPERATURE: '0'
+      BENCH_THINKING: 'false'
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-
-      - name: Install benchmark dependency
-        run: npm install --no-save pdfjs-dist
 
       - name: Verify Cloudflare credentials are available
         shell: bash
@@ -55,18 +53,22 @@ jobs:
             exit 2
           fi
 
-      - name: Run 2024 Kokugo benchmark
+      - name: Validate compact benchmark input
+        shell: bash
+        run: BENCH_DRY_RUN=true node benchmarks/ai-grading/run-workers-ai-grader.mjs
+
+      - name: Run compact 2024 grader benchmark
         shell: bash
         run: |
-          node benchmarks/ai-grading/run-workers-ai.mjs 2>&1 | tee "benchmarks/ai-grading/benchmark-${{ matrix.label }}.log"
+          node benchmarks/ai-grading/run-workers-ai-grader.mjs 2>&1 | tee "benchmarks/ai-grading/grader-${{ matrix.label }}.log"
 
       - name: Upload benchmark results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kokugo-ai-${{ matrix.label }}-${{ github.run_id }}
+          name: kokugo-grader-${{ matrix.label }}-${{ github.run_id }}
           path: |
             benchmarks/ai-grading/results/
-            benchmarks/ai-grading/benchmark-${{ matrix.label }}.log
+            benchmarks/ai-grading/grader-${{ matrix.label }}.log
           if-no-files-found: warn
           retention-days: 7
