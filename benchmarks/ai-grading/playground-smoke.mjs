@@ -18,10 +18,25 @@ const page = await context.newPage();
 
 const diagnostics = [];
 const network = [];
+const websocketFrames = [];
 page.on('console', (msg) => diagnostics.push(`[console:${msg.type()}] ${msg.text()}`));
 page.on('pageerror', (err) => diagnostics.push(`[pageerror] ${err.message}`));
-page.on('websocket', (ws) => diagnostics.push(`[websocket] ${ws.url()}`));
 page.on('requestfailed', (req) => diagnostics.push(`[requestfailed] ${req.method()} ${req.url()} ${req.failure()?.errorText ?? ''}`));
+page.on('websocket', (ws) => {
+  diagnostics.push(`[websocket] ${ws.url()}`);
+  ws.on('framesent', (event) => {
+    const payload = typeof event.payload === 'string'
+      ? event.payload.slice(0, 100000)
+      : `<binary:${event.payload?.byteLength ?? 0}>`;
+    websocketFrames.push({ direction: 'sent', url: ws.url(), payload });
+  });
+  ws.on('framereceived', (event) => {
+    const payload = typeof event.payload === 'string'
+      ? event.payload.slice(0, 100000)
+      : `<binary:${event.payload?.byteLength ?? 0}>`;
+    websocketFrames.push({ direction: 'received', url: ws.url(), payload });
+  });
+});
 page.on('request', (req) => {
   if (req.method() !== 'GET') {
     const headers = req.headers();
@@ -70,6 +85,7 @@ async function snapshot(name) {
     controls,
     diagnostics: [...diagnostics],
     network: [...network],
+    websocketFrames: [...websocketFrames],
   };
   await fs.writeFile(new URL(`${name}.json`, outDir), JSON.stringify(report, null, 2));
   await page.screenshot({ path: path.join(new URL('.', outDir).pathname, `${name}.png`), fullPage: true });
@@ -98,8 +114,8 @@ try {
     throw new Error('Smoke response did not contain OK.');
   }
 
-  console.log('--- NON-GET NETWORK ---');
-  console.log(JSON.stringify(network, null, 2));
+  console.log('--- WEBSOCKET FRAMES ---');
+  console.log(JSON.stringify(websocketFrames, null, 2));
 } finally {
   await browser.close();
 }
