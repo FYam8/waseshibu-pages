@@ -1,8 +1,8 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "model": "@cf/qwen/qwen3.8-27b",
   "year": 2024,
-  "reviewBasis": "Human semantic comparison against the official Waseda Shibuya answer and source passage. Technical retries are not semantic failures.",
+  "reviewBasis": "Human semantic comparison against the official Waseda Shibuya answer and source passage. Technical Playground failures are excluded from semantic scoring.",
   "cases": [
     {
       "caseId": "2024-1-6",
@@ -40,11 +40,21 @@
         "incorrect": 0,
         "assessment": "strong"
       }
+    },
+    {
+      "caseId": "2024-2-6",
+      "validSemanticRuns": 0,
+      "technicalAttempts": {
+        "threeRunAttempt": "First generation remained active beyond 180 seconds; later attempts returned generic Playground errors.",
+        "singleLongTimeoutAttempt": "Returned a generic Playground error before a semantic answer was produced."
+      },
+      "assessment": "not_measurable_via_public_playground",
+      "notes": "These are transport/UI execution failures, not wrong-answer evidence. Q2 must be rerun through authenticated Workers AI REST/binding or another reliable execution path before judging Qwen quality."
     }
   ],
   "overall": {
-    "solverAssessment": "pending_q2",
+    "solverAssessment": "q1_strong_q2_unmeasured",
     "productionGraderDecision": "not_approved",
-    "reason": "Q1 is strong, but Q2 must be tested before comparing reliability against Gemma 4."
+    "reason": "Q1 is strong. Q2 could not be semantically evaluated because the public Playground failed before returning a usable answer. Production judgment must wait for a reliable authenticated Workers AI run."
   }
 }
