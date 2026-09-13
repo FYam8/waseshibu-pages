@@ -1,0 +1,55 @@
+name: Kokugo AI benchmark
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'benchmarks/ai-grading/**'
+      - '.github/workflows/kokugo-ai-benchmark.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CF_AUTH_TOKEN: ${{ secrets.CLOUDFLARE_AUTH_TOKEN }}
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify Cloudflare credentials are available
+        shell: bash
+        run: |
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo 'CLOUDFLARE_ACCOUNT_ID is not configured.' >&2
+            exit 2
+          fi
+          if [ -z "$CF_AUTH_TOKEN" ] && [ -z "$CF_API_TOKEN" ]; then
+            echo 'Neither CLOUDFLARE_AUTH_TOKEN nor CLOUDFLARE_API_TOKEN is configured.' >&2
+            exit 2
+          fi
+
+      - name: Run 2024 Gemma solver benchmark
+        shell: bash
+        run: |
+          export CLOUDFLARE_AUTH_TOKEN="${CF_AUTH_TOKEN:-$CF_API_TOKEN}"
+          node benchmarks/ai-grading/run-workers-ai.mjs 2>&1 | tee benchmarks/ai-grading/benchmark.log
+
+      - name: Upload benchmark results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kokugo-ai-benchmark-${{ github.run_id }}
+          path: |
+            benchmarks/ai-grading/results/
+            benchmarks/ai-grading/benchmark.log
+          if-no-files-found: warn
+          retention-days: 7
