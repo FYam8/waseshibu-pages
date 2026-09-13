@@ -13,7 +13,7 @@ permissions:
 jobs:
   benchmark:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -28,22 +28,23 @@ jobs:
           npm install --no-save playwright pdfjs-dist
           npx playwright install --with-deps chromium
 
-      - name: Configure Qwen 3.8 and difficult Q2 diagnostic
+      - name: Configure Qwen 3.8 and difficult Q2 single-run diagnostic
         shell: bash
         run: |
           sed -i "s#const MODEL = '@cf/google/gemma-4-26b-a4b-it';#const MODEL = '@cf/qwen/qwen3.8-27b';#" benchmarks/ai-grading/run-playground-benchmark.mjs
           sed -i "s#const MODEL_SLUG = 'gemma-4-26b-a4b-it';#const MODEL_SLUG = 'qwen3.8-27b';#" benchmarks/ai-grading/run-playground-benchmark.mjs
           sed -i "s/providerValue === 'Google'/providerValue === 'Qwen'/" benchmarks/ai-grading/run-playground-benchmark.mjs
           sed -i "s/provider !== 'Google'/provider !== 'Qwen'/" benchmarks/ai-grading/run-playground-benchmark.mjs
-          sed -i "s/2024-playground-gemma4-/2024-playground-qwen38-q2-/" benchmarks/ai-grading/run-playground-benchmark.mjs
+          sed -i "s/2024-playground-gemma4-/2024-playground-qwen38-q2-long-/" benchmarks/ai-grading/run-playground-benchmark.mjs
+          sed -i 's/180_000/360_000/g' benchmarks/ai-grading/run-playground-benchmark.mjs
           cat > benchmarks/ai-grading/2024/solver-cases.json <<'JSON'
           {
-            "schemaVersion": 6,
+            "schemaVersion": 7,
             "rules": {
               "officialAnswerMustBeHiddenFromModel": true,
               "evaluateAfterGeneration": true,
-              "contextMode": "q2_focused_passage_diagnostic",
-              "repeatRuns": 3,
+              "contextMode": "q2_focused_passage_long_timeout_diagnostic",
+              "repeatRuns": 1,
               "diagnosticOnly": true
             },
             "source": {
@@ -69,14 +70,14 @@ jobs:
           }
           JSON
 
-      - name: Run Q2 with Qwen 3.8 27B
+      - name: Run one long-timeout Q2 sample with Qwen 3.8 27B
         run: node benchmarks/ai-grading/run-playground-benchmark.mjs
 
       - name: Upload benchmark results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kokugo-qwen-q2-benchmark-${{ github.run_id }}
-          path: benchmarks/ai-grading/results/2024-playground-qwen38-q2-*.json
+          name: kokugo-qwen-q2-long-${{ github.run_id }}
+          path: benchmarks/ai-grading/results/2024-playground-qwen38-q2-long-*.json
           if-no-files-found: warn
           retention-days: 7
