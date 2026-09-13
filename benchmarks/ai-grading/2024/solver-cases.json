@@ -1,10 +1,11 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "rules": {
     "officialAnswerMustBeHiddenFromModel": true,
     "evaluateAfterGeneration": true,
-    "contextMode": "official_pdf_full_passage",
-    "repeatRuns": 3
+    "contextMode": "q2_focused_excerpt_diagnostic",
+    "repeatRuns": 3,
+    "diagnosticOnly": true
   },
   "source": {
     "problemPdf": "https://www.waseda-shibuya.edu.sg/assets/upload/files/e84fc32c4eac71d3616a4743a3bf47eb1712047203.pdf",
@@ -18,24 +19,14 @@
         {"id": "甲", "points": 5, "maxChars": 10},
         {"id": "乙", "points": 5, "maxChars": 10}
       ],
-      "passagePageIndexes": [13, 14, 15, 16, 17, 18, 19],
+      "passagePageIndexes": [16, 17, 18],
       "questionPageIndex": 25,
       "questionLocator": {
         "start": "問六",
         "end": "〈下書き用"
       },
-      "layoutCaveat": "The official question uses a diagram. If text linearization appears to cause an error, rerun this case with visual input before judging model comprehension."
-    },
-    {
-      "id": "2024-1-6",
-      "points": 10,
-      "maxChars": 40,
-      "passagePageIndexes": [3, 4, 5],
-      "questionPageIndex": 11,
-      "questionLocator": {
-        "start": "問六",
-        "end": "〈下書き用"
-      }
+      "diagnosticPurpose": "Determine whether the public Playground failure is caused by the full-passage input size. This excerpt contains the senior NCO conversation, the officer-responsibility statement, and the narrator's final decision.",
+      "layoutCaveat": "The official question uses a diagram. If focused text still fails, test the question layout separately before judging model comprehension."
     }
   ]
 }
