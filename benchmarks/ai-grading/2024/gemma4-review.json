@@ -1,8 +1,11 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "model": "@cf/google/gemma-4-26b-a4b-it",
   "year": 2024,
-  "reviewBasis": "Human semantic comparison against the official Waseda Shibuya answers in questions.json. Technical Playground failures are excluded from semantic scoring.",
+  "reviewBasis": "Human semantic comparison against the official Waseda Shibuya answer and source passage. Technical Playground failures are excluded from semantic scoring.",
+  "sourceVerification": {
+    "importantCorrection": "The phrase 科学的個室 is present in the official source passage itself; it is not a model hallucination or PDF extraction error."
+  },
   "cases": [
     {
       "caseId": "2024-1-6",
@@ -30,15 +33,15 @@
           "answer": "科学的個室で養われた合理的思考を、いつどこでも徹底的に貫くこと。",
           "charCount": 32,
           "hardConstraintPass": true,
-          "verdict": "partial",
-          "notes": "中心趣旨は合うが、『科学的個室』は本文・公式解答にない不自然な表現で、満点相当とは扱わない。"
+          "verdict": "correct",
+          "notes": "『科学的個室』は公式本文に実在する表現。本文の結論をほぼ直接要約しており正答相当。"
         }
       ],
       "summary": {
-        "correct": 2,
-        "partial": 1,
+        "correct": 3,
+        "partial": 0,
         "incorrect": 0,
-        "assessment": "strong_but_not_perfect"
+        "assessment": "strong"
       }
     },
     {
@@ -79,6 +82,6 @@
   "overall": {
     "solverAssessment": "mixed",
     "productionGraderDecision": "not_approved",
-    "reason": "Q1 shows strong comprehension, but Q2 repeatedly misses a required central meaning even with visual input. A solver that can misunderstand the source question this way should not be trusted as the sole grader without further model comparison and rubric-based grader testing."
+    "reason": "Q1 is consistently strong, but Q2 repeatedly misses the required meaning of 乙 even when the question layout is supplied visually. More model comparison and rubric-based grader testing are required before production grading."
   }
 }
