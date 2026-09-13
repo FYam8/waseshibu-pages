@@ -5,7 +5,6 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 
 const MODEL = '@cf/google/gemma-4-26b-a4b-it';
-const homeUrl = `https://playground.ai.cloudflare.com/?model=${encodeURIComponent(MODEL)}`;
 const modelUrl = `https://playground.ai.cloudflare.com/models?model=${encodeURIComponent(MODEL)}`;
 const outDir = new URL('./results/', import.meta.url);
 await fs.mkdir(outDir, { recursive: true });
@@ -47,19 +46,12 @@ async function snapshot(name) {
   };
   await fs.writeFile(new URL(`${name}.json`, outDir), JSON.stringify(report, null, 2));
   await page.screenshot({ path: path.join(new URL('.', outDir).pathname, `${name}.png`), fullPage: true });
-  console.log(`--- ${name.toUpperCase()} URL ---`);
-  console.log(report.url);
   console.log(`--- ${name.toUpperCase()} BODY ---`);
   console.log(bodyText);
-  console.log(`--- ${name.toUpperCase()} CONTROLS ---`);
-  console.log(JSON.stringify(controls, null, 2));
   return report;
 }
 
 try {
-  await page.goto(homeUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-  await page.waitForTimeout(2_000);
-
   await page.goto(modelUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await page.waitForTimeout(5_000);
   await snapshot('playground-model-mode');
@@ -69,16 +61,15 @@ try {
   await textarea.fill(prompt);
   await page.getByRole('button', { name: 'Send message' }).click();
 
-  await page.waitForFunction(
-    (sentPrompt) => {
-      const text = document.body?.innerText ?? '';
-      return text.includes(sentPrompt) && text.includes('OK');
-    },
-    prompt,
-    { timeout: 60_000 },
-  );
-  await page.waitForTimeout(2_000);
-  await snapshot('playground-after-smoke-prompt');
+  const stop = page.getByRole('button', { name: 'Stop' });
+  await stop.waitFor({ state: 'visible', timeout: 15_000 });
+  await stop.waitFor({ state: 'hidden', timeout: 180_000 });
+  await page.waitForTimeout(1_500);
+
+  const completed = await snapshot('playground-after-smoke-prompt');
+  if (!completed.bodyText.includes('OK')) {
+    throw new Error('Smoke response did not contain OK.');
+  }
 
   console.log('--- DIAGNOSTICS ---');
   console.log(diagnostics.join('\n'));
