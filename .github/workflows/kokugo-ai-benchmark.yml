@@ -1,11 +1,6 @@
-name: Kokugo AI benchmark
+name: Kokugo AI benchmark (authenticated API)
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'benchmarks/ai-grading/**'
-      - '.github/workflows/kokugo-ai-benchmark.yml'
   workflow_dispatch:
 
 permissions:
@@ -23,7 +18,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Verify Cloudflare credentials are available
         shell: bash
