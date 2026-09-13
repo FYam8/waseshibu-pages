@@ -34,6 +34,7 @@ async function snapshot(name) {
       name: el.getAttribute('name'),
       ariaLabel: el.getAttribute('aria-label'),
       placeholder: el.getAttribute('placeholder'),
+      value: 'value' in el ? String(el.value ?? '').slice(0, 500) : null,
       text: (el.innerText || el.textContent || '').trim().slice(0, 500),
       role: el.getAttribute('role'),
     })));
@@ -57,14 +58,27 @@ async function snapshot(name) {
 
 try {
   await page.goto(homeUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-  await page.waitForTimeout(3_000);
-  await snapshot('playground-home');
+  await page.waitForTimeout(2_000);
 
-  // Use the public route exposed by the Playground itself. This avoids
-  // accidentally selecting a hidden duplicate sidebar label on the home page.
   await page.goto(modelUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-  await page.waitForTimeout(6_000);
+  await page.waitForTimeout(5_000);
   await snapshot('playground-model-mode');
+
+  const prompt = '日本語で「OK」とだけ答えてください。';
+  const textarea = page.locator('textarea[placeholder="Ask anything..."]');
+  await textarea.fill(prompt);
+  await page.getByRole('button', { name: 'Send message' }).click();
+
+  await page.waitForFunction(
+    (sentPrompt) => {
+      const text = document.body?.innerText ?? '';
+      return text.includes(sentPrompt) && text.includes('OK');
+    },
+    prompt,
+    { timeout: 60_000 },
+  );
+  await page.waitForTimeout(2_000);
+  await snapshot('playground-after-smoke-prompt');
 
   console.log('--- DIAGNOSTICS ---');
   console.log(diagnostics.join('\n'));
