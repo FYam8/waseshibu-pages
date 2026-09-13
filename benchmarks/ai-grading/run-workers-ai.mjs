@@ -139,7 +139,7 @@ async function runOne(testCase, runNo) {
   const input = {
     messages: [{ role: 'user', content: prepared.prompt }],
     temperature,
-    max_completion_tokens: 512,
+    max_completion_tokens: 2048,
     ...modelSpecificOptions(),
   };
   if (fixedSeed !== null) input.seed = fixedSeed;
@@ -203,7 +203,7 @@ const report = {
     seed: fixedSeed,
     thinking: model === '@cf/google/gemma-4-26b-a4b-it' ? thinking : null,
     repeatRuns,
-    maxCompletionTokens: 512,
+    maxCompletionTokens: 2048,
     officialAnswerShownToModel: false,
   },
   source: {
