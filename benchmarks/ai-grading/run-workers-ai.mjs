@@ -14,6 +14,7 @@ const repeatRuns = Number(process.env.BENCH_REPEAT || 3);
 const temperature = Number(process.env.BENCH_TEMPERATURE ?? 0);
 const fixedSeed = process.env.BENCH_SEED === undefined ? null : Number(process.env.BENCH_SEED);
 const thinking = process.env.BENCH_THINKING !== 'false';
+const reasoningEffort = process.env.BENCH_REASONING_EFFORT || 'low';
 
 if (!accountId || !token) {
   console.error('Set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_AUTH_TOKEN (or CLOUDFLARE_API_TOKEN).');
@@ -139,6 +140,7 @@ async function runOne(testCase, runNo) {
   const input = {
     messages: [{ role: 'user', content: prepared.prompt }],
     temperature,
+    reasoning_effort: reasoningEffort,
     max_completion_tokens: 2048,
     ...modelSpecificOptions(),
   };
@@ -203,6 +205,7 @@ const report = {
     seed: fixedSeed,
     thinking: model === '@cf/google/gemma-4-26b-a4b-it' ? thinking : null,
     repeatRuns,
+    reasoningEffort,
     maxCompletionTokens: 2048,
     officialAnswerShownToModel: false,
   },
