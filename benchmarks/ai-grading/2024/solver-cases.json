@@ -12,17 +12,6 @@
   },
   "cases": [
     {
-      "id": "2024-1-6",
-      "points": 10,
-      "maxChars": 40,
-      "passagePageIndexes": [3, 4, 5],
-      "questionPageIndex": 11,
-      "questionLocator": {
-        "start": "問六",
-        "end": "〈下書き用"
-      }
-    },
-    {
       "id": "2024-2-6",
       "points": 10,
       "parts": [
@@ -36,6 +25,17 @@
         "end": "〈下書き用"
       },
       "layoutCaveat": "The official question uses a diagram. If text linearization appears to cause an error, rerun this case with visual input before judging model comprehension."
+    },
+    {
+      "id": "2024-1-6",
+      "points": 10,
+      "maxChars": 40,
+      "passagePageIndexes": [3, 4, 5],
+      "questionPageIndex": 11,
+      "questionLocator": {
+        "start": "問六",
+        "end": "〈下書き用"
+      }
     }
   ]
 }
