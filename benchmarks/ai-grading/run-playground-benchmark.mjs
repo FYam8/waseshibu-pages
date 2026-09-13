@@ -17,9 +17,13 @@ const promptPath = path.join(__dirname, 'prompts', 'solver-v1.txt');
 const casesData = JSON.parse(await fs.readFile(casesPath, 'utf8'));
 const promptTemplate = await fs.readFile(promptPath, 'utf8');
 const repeatRuns = Number(process.env.BENCH_REPEAT || casesData.rules?.repeatRuns || 3);
+const maxTechnicalAttempts = Number(process.env.BENCH_TECH_RETRIES || 3);
 
 if (!Number.isInteger(repeatRuns) || repeatRuns < 1 || repeatRuns > 10) {
   throw new Error('BENCH_REPEAT must be an integer from 1 to 10.');
+}
+if (!Number.isInteger(maxTechnicalAttempts) || maxTechnicalAttempts < 1 || maxTechnicalAttempts > 5) {
+  throw new Error('BENCH_TECH_RETRIES must be an integer from 1 to 5.');
 }
 
 function sha256(data) {
@@ -151,6 +155,14 @@ function hardConstraintCheck(testCase, answer) {
   return null;
 }
 
+function safeUiDiagnostic(bodyText) {
+  return {
+    hasAssistantMarker: bodyText.includes('\nAssistant\n'),
+    hasThinkingLabel: bodyText.includes('Thinking'),
+    hasGenericErrorText: /\b(error|failed|try again|rate limit)\b/i.test(bodyText),
+  };
+}
+
 const pdfBytes = await downloadPdf(casesData.source.problemPdf);
 const pdfHash = sha256(pdfBytes);
 const promptHash = sha256(promptTemplate);
@@ -169,7 +181,24 @@ for (const testCase of casesData.cases) {
 const browser = await chromium.launch({ headless: true });
 const results = [];
 
-async function runOne(testCase, runNo) {
+async function waitForPlaygroundReady(page) {
+  const textarea = page.locator('textarea[placeholder="Ask anything..."]');
+  await textarea.waitFor({ state: 'visible', timeout: 60_000 });
+  await page.waitForFunction(
+    ({ slug }) => {
+      const modelInput = document.querySelector('input[aria-label="Model"]');
+      const providerInput = document.querySelector('input[aria-label="Provider"]');
+      const modelValue = modelInput && 'value' in modelInput ? String(modelInput.value) : '';
+      const providerValue = providerInput && 'value' in providerInput ? String(providerInput.value) : '';
+      return modelValue.includes(slug) && providerValue === 'Google';
+    },
+    { slug: MODEL_SLUG },
+    { timeout: 60_000 },
+  );
+  return textarea;
+}
+
+async function runAttempt(testCase, runNo, technicalAttempt) {
   const context = await browser.newContext({
     locale: 'ja-JP',
     viewport: { width: 1440, height: 1000 },
@@ -178,13 +207,12 @@ async function runOne(testCase, runNo) {
   const startedAt = Date.now();
   try {
     await page.goto(modelUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-    const textarea = page.locator('textarea[placeholder="Ask anything..."]');
-    await textarea.waitFor({ state: 'visible', timeout: 60_000 });
+    const textarea = await waitForPlaygroundReady(page);
 
     const provider = await page.getByRole('combobox', { name: 'Provider' }).inputValue();
     const selectedModel = await page.getByRole('combobox', { name: 'Model' }).inputValue();
     if (provider !== 'Google' || !selectedModel.includes(MODEL_SLUG)) {
-      throw new Error(`Unexpected Playground selection: provider=${provider}, model=${selectedModel}`);
+      throw new Error(`Unexpected Playground selection after ready check.`);
     }
 
     const prepared = preparedCases.get(testCase.id);
@@ -192,16 +220,23 @@ async function runOne(testCase, runNo) {
     await page.getByRole('button', { name: 'Send message' }).click();
 
     const stop = page.getByRole('button', { name: 'Stop' });
-    await stop.waitFor({ state: 'visible', timeout: 15_000 });
+    await stop.waitFor({ state: 'visible', timeout: 20_000 });
     await stop.waitFor({ state: 'hidden', timeout: 180_000 });
-    await page.waitForTimeout(1_000);
+    await page.waitForTimeout(1_250);
 
     const bodyText = await page.locator('body').innerText();
-    const answer = extractAssistantAnswer(bodyText);
+    let answer;
+    try {
+      answer = extractAssistantAnswer(bodyText);
+    } catch (error) {
+      const diag = safeUiDiagnostic(bodyText);
+      throw new Error(`${error.message} ui=${JSON.stringify(diag)}`);
+    }
     const hardConstraints = hardConstraintCheck(testCase, answer);
     return {
       caseId: testCase.id,
       run: runNo,
+      technicalAttempt,
       answer,
       hardConstraints,
       durationMs: Date.now() - startedAt,
@@ -210,16 +245,33 @@ async function runOne(testCase, runNo) {
       passageChars: prepared.passageChars,
       questionChars: prepared.questionChars,
     };
-  } catch (error) {
-    return {
-      caseId: testCase.id,
-      run: runNo,
-      error: error instanceof Error ? error.message : String(error),
-      durationMs: Date.now() - startedAt,
-    };
   } finally {
     await context.close();
   }
+}
+
+async function runOne(testCase, runNo) {
+  let lastError = null;
+  const attemptErrors = [];
+  for (let technicalAttempt = 1; technicalAttempt <= maxTechnicalAttempts; technicalAttempt += 1) {
+    try {
+      const result = await runAttempt(testCase, runNo, technicalAttempt);
+      if (attemptErrors.length) result.technicalAttemptErrors = attemptErrors;
+      return result;
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error);
+      attemptErrors.push({ technicalAttempt, error: lastError });
+      if (technicalAttempt < maxTechnicalAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 3_000));
+      }
+    }
+  }
+  return {
+    caseId: testCase.id,
+    run: runNo,
+    error: lastError,
+    technicalAttemptErrors: attemptErrors,
+  };
 }
 
 try {
@@ -233,8 +285,9 @@ try {
       } else {
         console.log(`  ANSWER: ${result.answer.replace(/\s+/g, ' ')}`);
         console.log(`  HARD_CONSTRAINT_PASS: ${result.hardConstraints?.pass ?? 'n/a'}`);
+        console.log(`  TECHNICAL_ATTEMPT: ${result.technicalAttempt}`);
       }
-      await new Promise((resolve) => setTimeout(resolve, 1_500));
+      await new Promise((resolve) => setTimeout(resolve, 2_000));
     }
   }
 } finally {
@@ -242,7 +295,7 @@ try {
 }
 
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   benchmark: 'waseshibu-kokugo-solver-playground',
   year: 2024,
   createdAt: new Date().toISOString(),
@@ -250,6 +303,7 @@ const report = {
   connection: 'Cloudflare AI Playground / Workers AI',
   settings: {
     repeatRuns,
+    maxTechnicalAttempts,
     playgroundDefaults: true,
     officialAnswerShownToModel: false,
   },
