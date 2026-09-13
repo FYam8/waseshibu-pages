@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Waseda Shibuya Japanese constructed-response AI benchmark. This file is isolated from production learning history and runtime data.",
+  "source": {
+    "year": 2024,
+    "problemPdf": "https://www.waseda-shibuya.edu.sg/assets/upload/files/e84fc32c4eac71d3616a4743a3bf47eb1712047203.pdf",
+    "officialAnswerPdf": "https://www.waseda-shibuya.edu.sg/assets/upload/files/240b8b7e02b0b6bb356bdd339d8b5b071712047213.pdf"
+  },
+  "questions": [
+    {
+      "id": "2024-1-6",
+      "section": 1,
+      "question": 6,
+      "points": 10,
+      "type": "free_response",
+      "maxChars": 40,
+      "prompt": "筆者は、科学者（科学的技術者、科学技術者）のあるべき姿について、どのように述べているか、四十字以内（句読点等を含む）で説明しなさい。",
+      "evidence": [
+        "専門領域では合理的・実証的な思考が支配しているが、その思考の習慣が研究室の外に持ち出されないことを筆者は問題視している。",
+        "再発防止には、科学の領域で養われた合理的思考を、いつどこでも徹底的に貫く必要があると述べている。"
+      ],
+      "officialAnswer": "科学者は、専門領域における合理的思考の精神を、領域外の信仰に対しても貫くべきだ。",
+      "rubricDraft": {
+        "status": "draft_for_human_review",
+        "requiredMeaning": [
+          "科学者・科学技術者のあるべき姿を述べている",
+          "専門領域で身につけた合理的思考を示している",
+          "その合理的思考を専門領域の外にも適用・貫徹することを示している"
+        ],
+        "importantRelation": "専門領域内の合理的思考を、専門領域外にも貫く",
+        "hardConstraints": [
+          "40字以内（句読点等を含む）",
+          "本文の趣旨と矛盾しない"
+        ]
+      }
+    },
+    {
+      "id": "2024-2-6",
+      "section": 2,
+      "question": 6,
+      "points": 10,
+      "type": "short_response_pair",
+      "parts": [
+        {"id": "甲", "points": 5, "maxChars": 10},
+        {"id": "乙", "points": 5, "maxChars": 10}
+      ],
+      "prompt": "『信管も、挿入したままにせよ』から『何よりも先ず特攻艇の兵器から信管を外ずさせよう』へと至る心情の変化を踏まえ、空欄甲・乙をそれぞれ十字以内（句読点等を含む）で補いなさい。",
+      "evidence": [
+        "先任下士官は、戦争の責任は士官が取るべきで、下士官兵には責任がないと『私』に告げる。",
+        "その会話を通じ、『私』は士官である自分と下士官兵との立場の違いに気づく。",
+        "『私』は最終的に、まず特攻艇の信管を外させようと考える。"
+      ],
+      "officialAnswer": {
+        "甲": "戦争の責任を負うべき",
+        "乙": "戦争の継続を諦めよう"
+      },
+      "rubricDraft": {
+        "status": "draft_for_human_review",
+        "requiredMeaning": {
+          "甲": "士官である自分が戦争の責任を負う立場だという認識",
+          "乙": "部下を巻き込んで戦争・特攻を継続することをやめる意思"
+        },
+        "hardConstraints": [
+          "甲・乙とも各10字以内（句読点等を含む）",
+          "本文の心情変化と矛盾しない"
+        ]
+      }
+    }
+  ]
+}
