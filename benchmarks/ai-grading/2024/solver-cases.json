@@ -1,11 +1,10 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 8,
   "rules": {
     "officialAnswerMustBeHiddenFromModel": true,
     "evaluateAfterGeneration": true,
-    "contextMode": "q1_full_passage_primary_diagnostic",
-    "repeatRuns": 3,
-    "diagnosticOnly": true
+    "contextMode": "official_pdf_page_text",
+    "repeatRuns": 3
   },
   "source": {
     "problemPdf": "https://www.waseda-shibuya.edu.sg/assets/upload/files/e84fc32c4eac71d3616a4743a3bf47eb1712047203.pdf",
@@ -21,8 +20,22 @@
       "questionLocator": {
         "start": "問六",
         "end": "〈下書き用"
+      }
+    },
+    {
+      "id": "2024-2-6",
+      "points": 10,
+      "parts": [
+        {"id": "甲", "points": 5, "maxChars": 10},
+        {"id": "乙", "points": 5, "maxChars": 10}
+      ],
+      "passagePageIndexes": [13, 14, 15, 16, 17, 18, 19],
+      "questionPageIndex": 25,
+      "questionLocator": {
+        "start": "問六",
+        "end": "〈下書き用"
       },
-      "diagnosticPurpose": "Primary text-only comprehension test. This question does not depend on the diagram-layout issue present in 2024-2-6."
+      "layoutCaveat": "The official question uses a diagram. Text-only results must be interpreted with the existing vision diagnostic in mind."
     }
   ]
 }
