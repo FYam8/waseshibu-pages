@@ -17,10 +17,36 @@ const context = await browser.newContext({
 const page = await context.newPage();
 
 const diagnostics = [];
+const network = [];
 page.on('console', (msg) => diagnostics.push(`[console:${msg.type()}] ${msg.text()}`));
 page.on('pageerror', (err) => diagnostics.push(`[pageerror] ${err.message}`));
 page.on('websocket', (ws) => diagnostics.push(`[websocket] ${ws.url()}`));
 page.on('requestfailed', (req) => diagnostics.push(`[requestfailed] ${req.method()} ${req.url()} ${req.failure()?.errorText ?? ''}`));
+page.on('request', (req) => {
+  if (req.method() !== 'GET') {
+    const headers = req.headers();
+    network.push({
+      phase: 'request',
+      method: req.method(),
+      url: req.url(),
+      resourceType: req.resourceType(),
+      contentType: headers['content-type'] ?? null,
+      postData: req.postData()?.slice(0, 20000) ?? null,
+    });
+  }
+});
+page.on('response', async (res) => {
+  const req = res.request();
+  if (req.method() !== 'GET') {
+    network.push({
+      phase: 'response',
+      method: req.method(),
+      url: res.url(),
+      status: res.status(),
+      contentType: (await res.allHeaders())['content-type'] ?? null,
+    });
+  }
+});
 
 async function snapshot(name) {
   const bodyText = (await page.locator('body').innerText()).slice(0, 40_000);
@@ -43,6 +69,7 @@ async function snapshot(name) {
     bodyText,
     controls,
     diagnostics: [...diagnostics],
+    network: [...network],
   };
   await fs.writeFile(new URL(`${name}.json`, outDir), JSON.stringify(report, null, 2));
   await page.screenshot({ path: path.join(new URL('.', outDir).pathname, `${name}.png`), fullPage: true });
@@ -71,8 +98,8 @@ try {
     throw new Error('Smoke response did not contain OK.');
   }
 
-  console.log('--- DIAGNOSTICS ---');
-  console.log(diagnostics.join('\n'));
+  console.log('--- NON-GET NETWORK ---');
+  console.log(JSON.stringify(network, null, 2));
 } finally {
   await browser.close();
 }
