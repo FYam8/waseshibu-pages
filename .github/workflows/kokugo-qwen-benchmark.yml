@@ -1,0 +1,53 @@
+name: Kokugo Qwen benchmark
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'benchmarks/ai-grading/2024/solver-cases.json'
+      - 'benchmarks/ai-grading/prompts/solver-v1.txt'
+      - 'benchmarks/ai-grading/run-playground-benchmark.mjs'
+      - '.github/workflows/kokugo-qwen-benchmark.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install runtime dependencies
+        shell: bash
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright pdfjs-dist
+          npx playwright install --with-deps chromium
+
+      - name: Adapt benchmark runner to Qwen 3.8 27B
+        shell: bash
+        run: |
+          sed -i "s#const MODEL = '@cf/google/gemma-4-26b-a4b-it';#const MODEL = '@cf/qwen/qwen3.8-27b';#" benchmarks/ai-grading/run-playground-benchmark.mjs
+          sed -i "s#const MODEL_SLUG = 'gemma-4-26b-a4b-it';#const MODEL_SLUG = 'qwen3.8-27b';#" benchmarks/ai-grading/run-playground-benchmark.mjs
+          sed -i "s/providerValue === 'Google'/providerValue === 'Qwen'/" benchmarks/ai-grading/run-playground-benchmark.mjs
+          sed -i "s/provider !== 'Google'/provider !== 'Qwen'/" benchmarks/ai-grading/run-playground-benchmark.mjs
+          sed -i "s/2024-playground-gemma4-/2024-playground-qwen38-/" benchmarks/ai-grading/run-playground-benchmark.mjs
+
+      - name: Run current 2024 Kokugo diagnostic with Qwen 3.8 27B
+        run: node benchmarks/ai-grading/run-playground-benchmark.mjs
+
+      - name: Upload benchmark results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kokugo-qwen-benchmark-${{ github.run_id }}
+          path: benchmarks/ai-grading/results/2024-playground-qwen38-*.json
+          if-no-files-found: warn
+          retention-days: 7
