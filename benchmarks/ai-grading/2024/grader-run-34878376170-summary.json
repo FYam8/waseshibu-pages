@@ -103,9 +103,10 @@
     }
   },
   "totalMeasuredUsage": {
-    "requests": 5,
-    "totalTokens": 13382,
-    "neurons": 810.583356380127
+    "requests": 6,
+    "totalTokens": 15810,
+    "neurons": 852.8015379902344,
+    "note": "A documentation push triggered run 34879227988. It was canceled to avoid duplicate work, but its Gemma job had already completed: 14/16, 2428 tokens, 42.21818161010742 neurons. Qwen and GLM were canceled."
   },
   "conclusion": {
     "recommendedCandidate": "@cf/google/gemma-4-26b-a4b-it",
