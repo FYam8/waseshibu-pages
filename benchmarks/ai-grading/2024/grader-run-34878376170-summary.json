@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "githubActionsRun": 34878376170,
+  "commit": "5c386b2",
+  "executedAt": "2026-09-15T03:02:00+09:00",
+  "settings": {
+    "temperature": 0,
+    "officialPassageShownToModel": false,
+    "goldLabelsShownToModel": false,
+    "candidateAnswers": 16,
+    "batching": "all answers in one request per run"
+  },
+  "initialComparison": [
+    {
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "exactVerdicts": 14,
+      "totalVerdicts": 16,
+      "accuracy": 0.875,
+      "latencyMs": 13231,
+      "usage": {
+        "promptTokens": 1320,
+        "completionTokens": 1133,
+        "totalTokens": 2453,
+        "neurons": 42.900001525878906
+      },
+      "mismatches": [
+        { "answerId": "q1_vague_belief", "gold": "partial", "actual": "incorrect" },
+        { "answerId": "q2_action_trap", "gold": "partial", "actual": "incorrect" }
+      ]
+    },
+    {
+      "model": "@cf/qwen/qwen3.8-27b",
+      "exactVerdicts": 14,
+      "totalVerdicts": 16,
+      "accuracy": 0.875,
+      "latencyMs": 49859,
+      "usage": {
+        "promptTokens": 1278,
+        "completionTokens": 1981,
+        "totalTokens": 3259,
+        "neurons": 628.5726928710938
+      },
+      "mismatches": [
+        { "answerId": "q2_position_trap", "gold": "partial", "actual": "incorrect" },
+        { "answerId": "q2_action_trap", "gold": "partial", "actual": "incorrect" }
+      ]
+    },
+    {
+      "model": "@cf/zai-org/glm-4.7-flash",
+      "exactVerdicts": 14,
+      "totalVerdicts": 16,
+      "accuracy": 0.875,
+      "latencyMs": 29201,
+      "usage": {
+        "promptTokens": 1461,
+        "completionTokens": 1067,
+        "totalTokens": 2528,
+        "neurons": 46.8743
+      },
+      "mismatches": [
+        { "answerId": "q2_position_trap", "gold": "partial", "actual": "incorrect" },
+        { "answerId": "q2_action_trap", "gold": "partial", "actual": "incorrect" }
+      ]
+    }
+  ],
+  "selectedModelRepetitions": {
+    "model": "@cf/google/gemma-4-26b-a4b-it",
+    "selectionReason": "Same accuracy as the other models with the lowest neuron use and latency in the initial comparison.",
+    "runs": [
+      {
+        "jobId": 104091160517,
+        "exactVerdicts": 14,
+        "totalVerdicts": 16,
+        "latencyMs": 13231,
+        "totalTokens": 2453,
+        "neurons": 42.900001525878906
+      },
+      {
+        "jobId": 104092538718,
+        "exactVerdicts": 14,
+        "totalVerdicts": 16,
+        "latencyMs": 12100,
+        "totalTokens": 2652,
+        "neurons": 48.327274322509766
+      },
+      {
+        "jobId": 104092864705,
+        "exactVerdicts": 14,
+        "totalVerdicts": 16,
+        "latencyMs": 17164,
+        "totalTokens": 2490,
+        "neurons": 43.909088134765625
+      }
+    ],
+    "aggregate": {
+      "exactVerdicts": 42,
+      "totalVerdicts": 48,
+      "accuracy": 0.875,
+      "meanLatencyMs": 14165,
+      "totalTokens": 7595,
+      "neurons": 135.1363639831543,
+      "stableMismatchIds": ["q1_vague_belief", "q2_action_trap"]
+    }
+  },
+  "totalMeasuredUsage": {
+    "requests": 5,
+    "totalTokens": 13382,
+    "neurons": 810.583356380127
+  },
+  "conclusion": {
+    "recommendedCandidate": "@cf/google/gemma-4-26b-a4b-it",
+    "productionReady": false,
+    "reason": "All models reached 87.5% exact verdict agreement. Gemma was substantially more efficient and repeated the same verdicts three times, but borderline partial answers were consistently graded too strictly and the gold labels still need a second human review."
+  }
+}

@@ -197,7 +197,11 @@ const report = {
     temperature,
     reasoningEffort,
     maxCompletionTokens: 3000,
-    thinking: (model === '@cf/google/gemma-4-26b-a4b-it' || model === '@cf/zai-org/glm-4.7-flash') ? thinking : null,
+    thinking: (
+      model === '@cf/google/gemma-4-26b-a4b-it'
+      || model === '@cf/qwen/qwen3.8-27b'
+      || model === '@cf/zai-org/glm-4.7-flash'
+    ) ? thinking : null,
     repeatRuns,
     batching: 'all answers in one request per run',
     officialPassageShownToModel: false,
