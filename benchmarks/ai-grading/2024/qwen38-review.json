@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 2,
+  "model": "@cf/qwen/qwen3.8-27b",
+  "year": 2024,
+  "reviewBasis": "Human semantic comparison against the official Waseda Shibuya answer and source passage. Technical Playground failures are excluded from semantic scoring.",
+  "cases": [
+    {
+      "caseId": "2024-1-6",
+      "officialMeaning": "専門領域で養った合理的思考を専門領域外にも貫くべきだという科学者の姿勢",
+      "validRuns": 3,
+      "runs": [
+        {
+          "run": 1,
+          "answer": "研究室の外にも合理的思考を持ち出し、徹底的に貫き、その限界を自覚すること",
+          "charCount": 36,
+          "hardConstraintPass": true,
+          "verdict": "partial",
+          "notes": "中心意味は満たすが、『その限界を自覚する』を答案要素として追加しており、公式解答より余計な意味を含むため厳格には満点相当としない。"
+        },
+        {
+          "run": 2,
+          "answer": "研究室で養った合理的思考を研究室の外にもち出し、不合理な目的を批判する。",
+          "charCount": 36,
+          "hardConstraintPass": true,
+          "verdict": "correct",
+          "notes": "合理的思考を専門領域外へ持ち出すという中心関係を明示し、本文の不合理な目的を批判する趣旨にも整合する。"
+        },
+        {
+          "run": 3,
+          "answer": "科学的個室で養われた理性的思考を、いつでもどこでも貫き通すべきである。",
+          "charCount": 35,
+          "hardConstraintPass": true,
+          "verdict": "correct",
+          "notes": "『科学的個室』は公式本文に実在する表現。公式解答と同じ中心意味を満たす。"
+        }
+      ],
+      "summary": {
+        "correct": 2,
+        "partial": 1,
+        "incorrect": 0,
+        "assessment": "strong"
+      }
+    },
+    {
+      "caseId": "2024-2-6",
+      "validSemanticRuns": 0,
+      "technicalAttempts": {
+        "threeRunAttempt": "First generation remained active beyond 180 seconds; later attempts returned generic Playground errors.",
+        "singleLongTimeoutAttempt": "Returned a generic Playground error before a semantic answer was produced."
+      },
+      "assessment": "not_measurable_via_public_playground",
+      "notes": "These are transport/UI execution failures, not wrong-answer evidence. Q2 must be rerun through authenticated Workers AI REST/binding or another reliable execution path before judging Qwen quality."
+    }
+  ],
+  "overall": {
+    "solverAssessment": "q1_strong_q2_unmeasured",
+    "productionGraderDecision": "not_approved",
+    "reason": "Q1 is strong. Q2 could not be semantically evaluated because the public Playground failed before returning a usable answer. Production judgment must wait for a reliable authenticated Workers AI run."
+  }
+}

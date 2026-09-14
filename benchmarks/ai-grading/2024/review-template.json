@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "benchmark": "waseshibu-kokugo-solver",
+  "year": 2024,
+  "instructions": "Fill one review entry per model run. Semantic correctness is decided by human review against the official answer and passage, not by the tested model itself.",
+  "reviews": [
+    {"caseId":"2024-1-6","run":1,"verdict":null,"allowedVerdicts":["correct","partial","incorrect"],"hallucination":null,"missingMeaning":[],"hardConstraintPass":null,"notes":""},
+    {"caseId":"2024-1-6","run":2,"verdict":null,"allowedVerdicts":["correct","partial","incorrect"],"hallucination":null,"missingMeaning":[],"hardConstraintPass":null,"notes":""},
+    {"caseId":"2024-1-6","run":3,"verdict":null,"allowedVerdicts":["correct","partial","incorrect"],"hallucination":null,"missingMeaning":[],"hardConstraintPass":null,"notes":""},
+    {"caseId":"2024-2-6","run":1,"verdict":null,"allowedVerdicts":["correct","partial","incorrect"],"hallucination":null,"missingMeaning":[],"hardConstraintPass":null,"notes":""},
+    {"caseId":"2024-2-6","run":2,"verdict":null,"allowedVerdicts":["correct","partial","incorrect"],"hallucination":null,"missingMeaning":[],"hardConstraintPass":null,"notes":""},
+    {"caseId":"2024-2-6","run":3,"verdict":null,"allowedVerdicts":["correct","partial","incorrect"],"hallucination":null,"missingMeaning":[],"hardConstraintPass":null,"notes":""}
+  ]
+}

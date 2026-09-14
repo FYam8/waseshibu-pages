@@ -1,0 +1,74 @@
+name: Kokugo AI grader benchmark (compact input)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/kokugo-ai-benchmark.yml'
+      - 'benchmarks/ai-grading/run-workers-ai-grader.mjs'
+      - 'benchmarks/ai-grading/2024/grader-cases.json'
+      - 'benchmarks/ai-grading/prompts/grader-v1.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: gemma4
+            model: '@cf/google/gemma-4-26b-a4b-it'
+          - label: qwen38
+            model: '@cf/qwen/qwen3.8-27b'
+          - label: glm47flash
+            model: '@cf/zai-org/glm-4.7-flash'
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_AUTH_TOKEN: ${{ secrets.CLOUDFLARE_AUTH_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      WORKERS_AI_MODEL: ${{ matrix.model }}
+      BENCH_REPEAT: '1'
+      BENCH_TEMPERATURE: '0'
+      BENCH_THINKING: 'false'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify Cloudflare credentials are available
+        shell: bash
+        run: |
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo 'CLOUDFLARE_ACCOUNT_ID is not configured.' >&2
+            exit 2
+          fi
+          if [ -z "$CLOUDFLARE_AUTH_TOKEN" ] && [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo 'Neither CLOUDFLARE_AUTH_TOKEN nor CLOUDFLARE_API_TOKEN is configured.' >&2
+            exit 2
+          fi
+
+      - name: Validate compact benchmark input
+        shell: bash
+        run: BENCH_DRY_RUN=true node benchmarks/ai-grading/run-workers-ai-grader.mjs
+
+      - name: Run compact 2024 grader benchmark
+        shell: bash
+        run: |
+          node benchmarks/ai-grading/run-workers-ai-grader.mjs 2>&1 | tee "benchmarks/ai-grading/grader-${{ matrix.label }}.log"
+
+      - name: Upload benchmark results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kokugo-grader-${{ matrix.label }}-${{ github.run_id }}
+          path: |
+            benchmarks/ai-grading/results/
+            benchmarks/ai-grading/grader-${{ matrix.label }}.log
+          if-no-files-found: warn
+          retention-days: 7
