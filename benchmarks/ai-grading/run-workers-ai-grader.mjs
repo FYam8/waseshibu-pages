@@ -37,10 +37,25 @@ function codePointLength(value) {
 }
 
 function modelSpecificOptions() {
-  if (model === '@cf/google/gemma-4-26b-a4b-it' || model === '@cf/zai-org/glm-4.7-flash') {
+  if (
+    model === '@cf/google/gemma-4-26b-a4b-it'
+    || model === '@cf/zai-org/glm-4.7-flash'
+    || model === '@cf/qwen/qwen3.8-27b'
+  ) {
     return { chat_template_kwargs: { enable_thinking: thinking } };
   }
   return {};
+}
+
+function textFromContent(content) {
+  if (typeof content === 'string') return content;
+  if (!Array.isArray(content)) return null;
+  const text = content.map((item) => {
+    if (typeof item === 'string') return item;
+    if (typeof item?.text === 'string') return item.text;
+    return '';
+  }).join('');
+  return text || null;
 }
 
 function publicInput() {
@@ -133,8 +148,21 @@ async function runOne(run) {
     throw new Error(`run ${run}: HTTP ${response.status} ${JSON.stringify(raw)}`);
   }
   const result = raw.result ?? raw;
-  const answer = result.response ?? result.choices?.[0]?.message?.content ?? result.output_text ?? null;
-  if (typeof answer !== 'string' || !answer.trim()) throw new Error(`run ${run}: no text answer`);
+  const choice = result.choices?.[0];
+  const answer = textFromContent(result.response)
+    ?? textFromContent(choice?.message?.content)
+    ?? textFromContent(result.output_text)
+    ?? textFromContent(result.output);
+  if (typeof answer !== 'string' || !answer.trim()) {
+    const usage = result.usage ?? {};
+    const diagnostic = {
+      finishReason: choice?.finish_reason ?? null,
+      completionTokens: usage.completion_tokens ?? null,
+      hasReasoningContent: Boolean(choice?.message?.reasoning_content),
+      resultKeys: Object.keys(result).sort(),
+    };
+    throw new Error(`run ${run}: no text answer ${JSON.stringify(diagnostic)}`);
+  }
   const parsed = parseJsonAnswer(answer);
   return {
     run,
