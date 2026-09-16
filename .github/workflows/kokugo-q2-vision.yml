@@ -1,11 +1,6 @@
 name: Kokugo Q2 vision diagnostic
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'benchmarks/ai-grading/run-playground-vision-q2.mjs'
-      - '.github/workflows/kokugo-q2-vision.yml'
   workflow_dispatch:
 
 permissions:

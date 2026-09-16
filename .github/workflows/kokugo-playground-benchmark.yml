@@ -1,13 +1,6 @@
 name: Kokugo Playground benchmark
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'benchmarks/ai-grading/run-playground-benchmark.mjs'
-      - 'benchmarks/ai-grading/2024/solver-cases.json'
-      - 'benchmarks/ai-grading/prompts/solver-v1.txt'
-      - '.github/workflows/kokugo-playground-benchmark.yml'
   workflow_dispatch:
 
 permissions:

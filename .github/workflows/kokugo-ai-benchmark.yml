@@ -32,9 +32,8 @@ jobs:
         run: BENCH_DRY_RUN=true node benchmarks/ai-grading/run-workers-ai-grader.mjs
 
   benchmark:
-    # One PR run is intentionally enabled for the initial five-year validation.
-    # Restore this to workflow_dispatch-only after the result is recorded.
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
+    # API inference is opt-in. Pull requests only run the validation job above.
+    if: github.event_name == 'workflow_dispatch'
     needs: validate
     runs-on: ubuntu-latest
     env:

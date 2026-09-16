@@ -1,10 +1,6 @@
 name: Kokugo Qwen smoke
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - '.github/workflows/kokugo-qwen-smoke.yml'
   workflow_dispatch:
 
 permissions:

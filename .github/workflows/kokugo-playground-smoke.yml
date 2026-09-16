@@ -1,11 +1,6 @@
 name: Kokugo Playground smoke
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'benchmarks/ai-grading/playground-smoke.mjs'
-      - '.github/workflows/kokugo-playground-smoke.yml'
   workflow_dispatch:
 
 permissions:

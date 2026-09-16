@@ -126,7 +126,7 @@
           "id": "2024_partial",
           "answer": {"甲": "戦争責任を担う", "乙": "信管を外させよう"},
           "expectedVerdict": "partial",
-          "expectedPartVerdicts": {"甲": "correct", "乙": "incorrect"}
+          "expectedPartVerdicts": {"甲": "correct", "乙": "partial"}
         },
         {
           "id": "2024_incorrect",
@@ -173,7 +173,7 @@
           "id": "2025_partial",
           "answer": {"X": "機械によって正確に測定すること", "Y": "対象に客観性を見出すこと"},
           "expectedVerdict": "partial",
-          "expectedPartVerdicts": {"X": "correct", "Y": "incorrect"}
+          "expectedPartVerdicts": {"X": "correct", "Y": "partial"}
         },
         {
           "id": "2025_incorrect",
