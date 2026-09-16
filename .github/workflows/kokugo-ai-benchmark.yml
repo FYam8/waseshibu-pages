@@ -1,36 +1,45 @@
-name: Kokugo AI grader benchmark (compact input)
+name: Kokugo AI grader benchmark (2022-2026 compact input)
 
 on:
   workflow_dispatch:
+    inputs:
+      model:
+        description: Workers AI model ID
+        required: true
+        default: '@cf/google/gemma-4-26b-a4b-it'
   pull_request:
     branches: [main]
     paths:
       - '.github/workflows/kokugo-ai-benchmark.yml'
       - 'benchmarks/ai-grading/run-workers-ai-grader.mjs'
-      - 'benchmarks/ai-grading/2024/grader-cases.json'
-      - 'benchmarks/ai-grading/prompts/grader-v1.txt'
+      - 'benchmarks/ai-grading/2022-2026/grader-cases-v2.json'
+      - 'benchmarks/ai-grading/prompts/grader-v2.txt'
 
 permissions:
   contents: read
 
 jobs:
-  benchmark:
+  validate:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - label: gemma4
-            model: '@cf/google/gemma-4-26b-a4b-it'
-          - label: qwen38
-            model: '@cf/qwen/qwen3.8-27b'
-          - label: glm47flash
-            model: '@cf/zai-org/glm-4.7-flash'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate five-year benchmark input
+        run: BENCH_DRY_RUN=true node benchmarks/ai-grading/run-workers-ai-grader.mjs
+
+  benchmark:
+    if: github.event_name == 'workflow_dispatch'
+    needs: validate
+    runs-on: ubuntu-latest
     env:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_AUTH_TOKEN: ${{ secrets.CLOUDFLARE_AUTH_TOKEN }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      WORKERS_AI_MODEL: ${{ matrix.model }}
+      WORKERS_AI_MODEL: ${{ inputs.model }}
       BENCH_REPEAT: '1'
       BENCH_TEMPERATURE: '0'
       BENCH_THINKING: 'false'
@@ -53,22 +62,18 @@ jobs:
             exit 2
           fi
 
-      - name: Validate compact benchmark input
-        shell: bash
-        run: BENCH_DRY_RUN=true node benchmarks/ai-grading/run-workers-ai-grader.mjs
-
-      - name: Run compact 2024 grader benchmark
+      - name: Run compact 2022-2026 grader benchmark once
         shell: bash
         run: |
-          node benchmarks/ai-grading/run-workers-ai-grader.mjs 2>&1 | tee "benchmarks/ai-grading/grader-${{ matrix.label }}.log"
+          node benchmarks/ai-grading/run-workers-ai-grader.mjs 2>&1 | tee "benchmarks/ai-grading/grader-five-year.log"
 
       - name: Upload benchmark results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kokugo-grader-${{ matrix.label }}-${{ github.run_id }}
+          name: kokugo-grader-five-year-${{ github.run_id }}
           path: |
             benchmarks/ai-grading/results/
-            benchmarks/ai-grading/grader-${{ matrix.label }}.log
+            benchmarks/ai-grading/grader-five-year.log
           if-no-files-found: warn
           retention-days: 7
