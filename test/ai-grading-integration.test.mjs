@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { cacheSource, parseConstraints, pastQuestionId } from '../assets/ai-grading-integration.js';
+import { cacheSource, friendlyError, parseConstraints, pastQuestionId } from '../assets/ai-grading-integration.js';
 
 test('maps only the five reviewed past-paper questions', () => {
   assert.equal(pastQuestionId('2024', '大問2 問6'), '2024-2-6');
@@ -15,6 +15,11 @@ test('extracts written-answer limits', () => {
 
 test('cache identity changes when the answer changes', () => {
   assert.notEqual(cacheSource('original', '問', '答案A'), cacheSource('original', '問', '答案B'));
+});
+
+test('shows the provider usage-limit error without claiming an application daily cap', () => {
+  assert.equal(friendlyError({ message: 'AIの利用上限に達しました。' }, 429), 'AIの利用上限に達しました。');
+  assert.doesNotMatch(friendlyError({}, 429), /本日のAI判定回数/);
 });
 
 test('AI integration cannot write to existing learning history or score controls', () => {

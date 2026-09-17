@@ -88,8 +88,8 @@ function renderResult(host, response, fromCache = false) {
   host.append(element('small', 'ai-feedback-notice', `${grade.referenceNotice}${fromCache ? '（保存済みの判定を表示）' : ''} AI判定は既存の得点・学習履歴を変更しません。`));
 }
 
-function friendlyError(data, status) {
-  if (status === 429) return '本日のAI判定回数の上限に達しました。既存の採点機能はそのまま利用できます。';
+export function friendlyError(data, status) {
+  if (status === 429) return data?.message || 'AIの利用上限に達しました。時間をおいてもう一度お試しください。既存の採点機能はそのまま利用できます。';
   return data?.message || 'AI判定を完了できませんでした。時間をおいてお試しください。';
 }
 
@@ -204,4 +204,3 @@ if (typeof document !== 'undefined') {
   enhance();
   new MutationObserver(enhance).observe(document.documentElement, { childList: true, subtree: true });
 }
-

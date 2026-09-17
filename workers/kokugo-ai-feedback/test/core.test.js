@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { QUESTIONS, PUBLIC_QUESTIONS, buildPrompt, mechanicalChecks, validateCustomSubmission, validateGrade, validateSubmission } from '../src/core.js';
+import { QUESTIONS, PUBLIC_QUESTIONS, buildPrompt, isUsageLimitError, mechanicalChecks, validateCustomSubmission, validateGrade, validateSubmission } from '../src/core.js';
 
 test('publishes five years without reference answers', () => {
   assert.deepEqual(PUBLIC_QUESTIONS.map((q) => q.year), [2022, 2023, 2024, 2025, 2026]);
@@ -57,4 +57,11 @@ test('validates an original drill without accepting an entire passage', () => {
   assert.equal(submission.question.maxScore, 10);
   assert.equal(mechanicalChecks(submission.question, submission.answer).withinLimit, true);
   assert.equal(validateCustomSubmission({ question: '問', answer: '答', referenceAnswer: '例', answerRationale: '考え方' }).ok, false);
+});
+
+test('distinguishes usage limits from temporary capacity errors', () => {
+  assert.equal(isUsageLimitError(Object.assign(new Error('Account limited: daily free allocation used'), { code: 3036, status: 429 })), true);
+  assert.equal(isUsageLimitError(Object.assign(new Error('rate limit exceeded'), { status: 429 })), true);
+  assert.equal(isUsageLimitError(Object.assign(new Error('Out of capacity'), { code: 3040, status: 429 })), false);
+  assert.equal(isUsageLimitError(new Error('network timeout')), false);
 });
