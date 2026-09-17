@@ -1,12 +1,6 @@
 name: Deploy Kokugo AI feedback pilot
 
 on:
-  # Initial PR deployment only. Restore to workflow_dispatch-only after verification.
-  pull_request:
-    branches: [main]
-    paths:
-      - 'workers/kokugo-ai-feedback/**'
-      - '.github/workflows/deploy-kokugo-ai-feedback.yml'
   workflow_dispatch:
 
 permissions:
@@ -53,3 +47,4 @@ jobs:
         run: pnpm exec wrangler deploy --dry-run
       - name: Deploy public pilot
         run: pnpm exec wrangler deploy
+
