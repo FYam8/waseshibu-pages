@@ -137,6 +137,17 @@ export function parseModelText(value) {
   return JSON.parse(text.trim().replace(/^```json\s*/i, '').replace(/\s*```$/, ''));
 }
 
+export function isUsageLimitError(error) {
+  const code = String(error?.code ?? error?.cause?.code ?? '');
+  const text = [error?.name, error?.message, error?.cause?.message, String(error)]
+    .filter(Boolean)
+    .join(' ');
+  if (code === '3040' || /\b3040\b|out of capacity/i.test(text)) return false;
+  return code === '3036'
+    || /\b3036\b|account limited|daily free allocation|usage limit|rate.?limit|quota(?: has been)? exceeded|limit exceeded/i.test(text)
+    || (Number(error?.status) === 429 && code !== '3040');
+}
+
 export function validateGrade(result, question) {
   const errors = [];
   if (!Number.isInteger(result?.referenceScore) || result.referenceScore < 0 || result.referenceScore > question.maxScore) errors.push('invalid referenceScore');

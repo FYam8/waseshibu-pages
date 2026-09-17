@@ -1,5 +1,5 @@
 import { DurableObject } from 'cloudflare:workers';
-import { PUBLIC_QUESTIONS, buildPrompt, parseModelText, validateCustomSubmission, validateGrade, validateSubmission } from './core.js';
+import { PUBLIC_QUESTIONS, buildPrompt, isUsageLimitError, parseModelText, validateCustomSubmission, validateGrade, validateSubmission } from './core.js';
 
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' };
 
@@ -57,20 +57,8 @@ function json(request, data, status = 200) {
 
 function limits(env) {
   return {
-    daily: Math.max(1, Number.parseInt(env.DAILY_REQUEST_LIMIT || '25', 10)),
-    perIp: Math.max(1, Number.parseInt(env.PER_IP_DAILY_LIMIT || '3', 10)),
     output: Math.min(1000, Math.max(200, Number.parseInt(env.MAX_COMPLETION_TOKENS || '700', 10)))
   };
-}
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-async function ipHash(request) {
-  const source = request.headers.get('CF-Connecting-IP') || 'local';
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(source));
-  return Array.from(new Uint8Array(digest).slice(0, 12), (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
 function extractText(result) {
@@ -91,10 +79,6 @@ async function grade(request, env, validator = validateSubmission) {
   if (!submission.ok) return json(request, { error: 'invalid_request', message: submission.error }, 400);
 
   const config = limits(env);
-  const gate = env.USAGE_GATE.getByName(today());
-  const reservation = await gate.reserve(await ipHash(request), config.daily, config.perIp);
-  if (!reservation.allowed) return json(request, { error: 'rate_limited', reason: reservation.reason, quota: reservation }, 429);
-
   const started = Date.now();
   let aiResult;
   try {
@@ -106,6 +90,10 @@ async function grade(request, env, validator = validateSubmission) {
       chat_template_kwargs: { enable_thinking: false }
     });
   } catch (error) {
+    if (isUsageLimitError(error)) {
+      console.error(JSON.stringify({ event: 'ai_usage_limit', questionId: submission.question.id, error: String(error) }));
+      return json(request, { error: 'usage_limit_reached', message: 'AIの利用上限に達しました。時間をおいてもう一度お試しください。' }, 429);
+    }
     console.error(JSON.stringify({ event: 'ai_error', questionId: submission.question.id, error: String(error) }));
     return json(request, { error: 'ai_unavailable', message: 'AI判定を完了できませんでした。時間をおいてお試しください。' }, 503);
   }
@@ -129,7 +117,7 @@ async function grade(request, env, validator = validateSubmission) {
       judgedOnce: true,
       latencyMs: Date.now() - started,
       usage,
-      quota: { reservedRequests: reservation.total, dailyLimit: config.daily, remaining: reservation.remaining }
+      limitPolicy: { applicationDailyLimit: null, applicationPerIpLimit: null, enforcedBy: 'cloudflare' }
     }
   });
 }
@@ -145,9 +133,12 @@ export default {
     if (request.method === 'GET' && url.pathname === '/health') return json(request, { ok: true, model: env.MODEL });
     if (request.method === 'GET' && url.pathname === '/v1/questions') return json(request, { questions: PUBLIC_QUESTIONS });
     if (request.method === 'GET' && url.pathname === '/v1/usage') {
-      const config = limits(env);
-      const gate = env.USAGE_GATE.getByName(today());
-      return json(request, { dateUtc: today(), ...(await gate.status(config.daily)), freeAllocationNeuronsPerDay: 10000, note: 'reservedRequests is a protective request counter, not Cloudflare billing usage.' });
+      return json(request, {
+        applicationDailyLimit: null,
+        applicationPerIpLimit: null,
+        enforcedBy: 'cloudflare',
+        note: 'アプリ独自の日次・IP別上限はありません。Cloudflare側の利用上限到達時は判定APIが429を返します。'
+      });
     }
     if (request.method === 'POST' && url.pathname === '/v1/grade') return grade(request, env);
     if (request.method === 'POST' && url.pathname === '/v1/grade/custom') return grade(request, env, validateCustomSubmission);

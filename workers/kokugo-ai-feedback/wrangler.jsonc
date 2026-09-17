@@ -24,8 +24,6 @@
   ],
   "vars": {
     "MODEL": "@cf/google/gemma-4-26b-a4b-it",
-    "DAILY_REQUEST_LIMIT": "25",
-    "PER_IP_DAILY_LIMIT": "3",
     "MAX_COMPLETION_TOKENS": "700"
   },
   "observability": {
