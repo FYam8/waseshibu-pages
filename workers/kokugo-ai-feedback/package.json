@@ -1,0 +1,14 @@
+{
+  "name": "waseshibu-kokugo-ai-feedback",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "types": "wrangler types",
+    "check": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.133.0"
+  }
+}
