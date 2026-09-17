@@ -52,6 +52,12 @@ export function validateSubmission(value) {
   const question = QUESTIONS.find((item) => item.id === value.questionId);
   if (!question) return { ok: false, error: 'Unsupported questionId.' };
   if (question.parts) {
+    if (typeof value.answer === 'string') {
+      const answer = value.answer.trim();
+      if (!answer) return { ok: false, error: 'Answer is empty.' };
+      if (codePointLength(answer) > 400) return { ok: false, error: 'Answer is too long.' };
+      return { ok: true, question, answer };
+    }
     if (!value.answer || typeof value.answer !== 'object' || Array.isArray(value.answer)) return { ok: false, error: 'Part answers are required.' };
     const answer = Object.fromEntries(question.parts.map((part) => [part.id, String(value.answer[part.id] ?? '').trim()]));
     if (Object.values(answer).every((part) => !part)) return { ok: false, error: 'Answer is empty.' };
@@ -63,8 +69,44 @@ export function validateSubmission(value) {
   return { ok: true, question, answer: value.answer.trim() };
 }
 
+function cleanText(value, maxLength) {
+  const text = String(value ?? '').trim();
+  return text && codePointLength(text) <= maxLength ? text : null;
+}
+
+export function validateCustomSubmission(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return { ok: false, error: 'JSON object is required.' };
+  const questionText = cleanText(value.question, 300);
+  const answer = cleanText(value.answer, 400);
+  const referenceAnswer = cleanText(value.referenceAnswer, 500);
+  const rationale = cleanText(value.answerRationale, 800);
+  const requiredElements = Array.isArray(value.requiredElements)
+    ? value.requiredElements.map((item) => cleanText(item, 120)).filter(Boolean).slice(0, 8)
+    : [];
+  if (!questionText) return { ok: false, error: 'Question is missing or too long.' };
+  if (!answer) return { ok: false, error: 'Answer is missing or too long.' };
+  if (!referenceAnswer) return { ok: false, error: 'Reference answer is missing or too long.' };
+  if (!rationale) return { ok: false, error: 'Answer rationale is missing or too long.' };
+  if (!requiredElements.length) return { ok: false, error: 'Required elements are missing.' };
+
+  const minChars = Math.max(0, Math.min(400, Number.parseInt(value.constraints?.minChars || '0', 10) || 0));
+  const maxChars = Math.max(1, Math.min(400, Number.parseInt(value.constraints?.maxChars || '400', 10) || 400));
+  const requiredWords = Array.isArray(value.constraints?.requiredWords)
+    ? value.constraints.requiredWords.map((item) => cleanText(item, 30)).filter(Boolean).slice(0, 8)
+    : [];
+  const question = {
+    id: 'original-practice', label: 'オリジナル類題', maxScore: 10,
+    question: questionText, referenceAnswer,
+    essentialMeanings: requiredElements,
+    requiredRelations: [rationale],
+    constraints: { minChars, maxChars, requiredWords }
+  };
+  return { ok: true, question, answer };
+}
+
 export function mechanicalChecks(question, answer) {
   if (question.parts) {
+    if (typeof answer === 'string') return { rawAnswer: answer, note: '画面表示から取得した複数欄の答案。欄ごとの文字数はAIが表示ラベルを基に確認する。' };
     return { parts: Object.fromEntries(question.parts.map((part) => {
       const text = String(answer[part.id] ?? '');
       const charCount = codePointLength(text);
@@ -73,7 +115,8 @@ export function mechanicalChecks(question, answer) {
   }
   const charCount = codePointLength(answer);
   return {
-    charCount, maxChars: question.constraints.maxChars, withinLimit: charCount <= question.constraints.maxChars,
+    charCount, minChars: question.constraints.minChars ?? 0, maxChars: question.constraints.maxChars,
+    withinLimit: charCount >= (question.constraints.minChars ?? 0) && charCount <= question.constraints.maxChars,
     present: charCount > 0,
     requiredWords: question.constraints.requiredWords.map((word) => ({ word, present: answer.includes(word) }))
   };

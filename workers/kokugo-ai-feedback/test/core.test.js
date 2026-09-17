@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { QUESTIONS, PUBLIC_QUESTIONS, buildPrompt, mechanicalChecks, validateGrade, validateSubmission } from '../src/core.js';
+import { QUESTIONS, PUBLIC_QUESTIONS, buildPrompt, mechanicalChecks, validateCustomSubmission, validateGrade, validateSubmission } from '../src/core.js';
 
 test('publishes five years without reference answers', () => {
   assert.deepEqual(PUBLIC_QUESTIONS.map((q) => q.year), [2022, 2023, 2024, 2025, 2026]);
@@ -42,4 +42,19 @@ test('rejects internally inconsistent part grading', () => {
     explanation: '品位が不足しています。', improvementAdvice: '品位を補いましょう。'
   };
   assert.deepEqual(validateGrade(grade, question), ['inconsistent part X']);
+});
+
+test('validates an original drill without accepting an entire passage', () => {
+  const submission = validateCustomSubmission({
+    question: '理由を40字以内で説明せよ。',
+    answer: '設備は置かれる状況によって利用価値が変わるから。',
+    referenceAnswer: '設備の価値は数だけでなく利用状況との組合せで変わるから。',
+    answerRationale: '数と利用状況を対比し、価値が状況との組合せで変わることを述べる。',
+    requiredElements: ['数だけでは決まらない', '利用状況との組合せで変わる'],
+    constraints: { maxChars: 40 }
+  });
+  assert.equal(submission.ok, true);
+  assert.equal(submission.question.maxScore, 10);
+  assert.equal(mechanicalChecks(submission.question, submission.answer).withinLimit, true);
+  assert.equal(validateCustomSubmission({ question: '問', answer: '答', referenceAnswer: '例', answerRationale: '考え方' }).ok, false);
 });
