@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "kind": "reviewed_benchmark_summary",
+  "githubActions": {
+    "runId": 35145147952,
+    "commit": "e4be8fe",
+    "artifactId": 10466800975,
+    "artifactName": "kokugo-grader-five-year-35145147952",
+    "artifactSha256": "2b25c23824e25291510517ca9350be6411c764a203ed5b8f59c2754f7e63b9e0"
+  },
+  "model": "@cf/google/gemma-4-26b-a4b-it",
+  "settings": {
+    "temperature": 0,
+    "thinking": false,
+    "repeatRuns": 1,
+    "maxCompletionTokens": 5000,
+    "officialPassageShownToModel": false,
+    "goldLabelsShownToModel": false
+  },
+  "input": {
+    "years": [2022, 2023, 2024, 2025, 2026],
+    "questionCount": 5,
+    "answerCount": 15,
+    "promptChars": 8538,
+    "casesSha256": "77d98cc1de42320da07cc3d4f243a00d0f134cffa222af5e41458523b3804d31",
+    "promptSha256": "a89c982863a6371bb4691133c0bc2307cf42536105ca0781b007226a7ed36d4a"
+  },
+  "execution": {
+    "latencyMs": 45333,
+    "usage": {
+      "promptTokens": 3204,
+      "completionTokens": 4465,
+      "totalTokens": 7669,
+      "neurons": 150.89999389648438
+    }
+  },
+  "rawEvaluation": {
+    "overallVerdictMatches": 15,
+    "overallVerdictTotal": 15,
+    "partVerdictMatches": 12,
+    "partVerdictTotal": 15,
+    "schemaValid": 15,
+    "missingOrExtraIds": false
+  },
+  "reviewedEvaluation": {
+    "overallVerdictMatches": 15,
+    "overallVerdictTotal": 15,
+    "partVerdictMatchesAfterRubricClarification": 14,
+    "partVerdictTotal": 15,
+    "remainingInternalConsistencyIssue": "2026_partial.X was labeled correct while the response itself recorded the essential meaning 品位 as missing."
+  },
+  "answers": [
+    {"id": "2022_exact", "verdict": "correct", "referenceScore": 12},
+    {"id": "2022_partial", "verdict": "partial", "referenceScore": 7},
+    {"id": "2022_incorrect", "verdict": "incorrect", "referenceScore": 0},
+    {"id": "2023_exact", "verdict": "correct", "referenceScore": 10},
+    {"id": "2023_partial_format", "verdict": "partial", "referenceScore": 4},
+    {"id": "2023_incorrect", "verdict": "incorrect", "referenceScore": 1},
+    {"id": "2024_exact", "verdict": "correct", "referenceScore": 10, "parts": {"甲": "correct", "乙": "correct"}},
+    {"id": "2024_partial", "verdict": "partial", "referenceScore": 5, "parts": {"甲": "correct", "乙": "partial"}},
+    {"id": "2024_incorrect", "verdict": "incorrect", "referenceScore": 0, "parts": {"甲": "incorrect", "乙": "incorrect"}},
+    {"id": "2025_exact", "verdict": "correct", "referenceScore": 12, "parts": {"X": "correct", "Y": "correct"}},
+    {"id": "2025_partial", "verdict": "partial", "referenceScore": 8, "parts": {"X": "correct", "Y": "partial"}},
+    {"id": "2025_incorrect", "verdict": "incorrect", "referenceScore": 0, "parts": {"X": "incorrect", "Y": "incorrect"}},
+    {"id": "2026_exact", "verdict": "correct", "referenceScore": 9, "parts": {"X": "correct", "Y": "correct"}},
+    {"id": "2026_partial", "verdict": "partial", "referenceScore": 7, "parts": {"X": "correct", "Y": "correct"}},
+    {"id": "2026_incorrect", "verdict": "incorrect", "referenceScore": 0, "parts": {"X": "incorrect", "Y": "incorrect"}}
+  ]
+}

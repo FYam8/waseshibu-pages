@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "benchmark": "waseshibu-kokugo-grader",
+  "year": 2024,
+  "goldStandard": {
+    "status": "provisional_single_reviewer",
+    "reviewMethod": "Reference labels were created in ChatGPT Pro from the official answers, explicit meaning elements, and candidate answers. A second human reviewer must confirm them before production use.",
+    "labels": ["correct", "partial", "incorrect"]
+  },
+  "questions": [
+    {
+      "id": "2024-1-6",
+      "points": 10,
+      "answerFormat": "single",
+      "maxChars": 40,
+      "referenceAnswer": "科学者は、専門領域における合理的思考の精神を、領域外の信仰に対しても貫くべきだ。",
+      "rubric": {
+        "requiredMeaning": [
+          {"id": "rational_thinking", "meaning": "専門領域で身につけた合理的思考を示す"},
+          {"id": "outside_domain", "meaning": "合理的思考を専門領域の外にも適用し、貫く"}
+        ],
+        "requiredRelation": "専門領域内で培った合理的思考を、専門領域外にも貫く",
+        "rules": [
+          "語句の一致ではなく意味で判定する",
+          "二つの必須意味とその関係があればcorrect",
+          "中心意味の一部だけならpartial",
+          "中心意味が違う、逆、または問いに答えていなければincorrect",
+          "40字を超えた答案は意味が正しくてもincorrect"
+        ]
+      },
+      "answers": [
+        {"id": "q1_exact", "answer": "科学者は、専門領域における合理的思考を、領域外の信仰に対しても貫くべきだ。", "gold": "correct", "goldReason": "模範解答と同じ意味で40字以内。"},
+        {"id": "q1_paraphrase", "answer": "専門で培った合理的な考え方を、専門外でも一貫して用いるべきだ。", "gold": "correct", "goldReason": "二つの必須意味と関係を自然に言い換えている。"},
+        {"id": "q1_missing_outside", "answer": "科学者は専門領域で合理的思考を徹底すべきだ。", "gold": "partial", "goldReason": "合理的思考はあるが、専門領域外へ貫く意味がない。"},
+        {"id": "q1_vague_belief", "answer": "科学者は専門領域の外でも自らの信念を貫くべきだ。", "gold": "partial", "goldReason": "領域外へ貫く方向はあるが、合理的思考という必須意味が欠ける。"},
+        {"id": "q1_reversed", "answer": "科学者は専門外では合理性にこだわらず信仰を重んじるべきだ。", "gold": "incorrect", "goldReason": "模範解答の中心関係と逆である。"},
+        {"id": "q1_keyword_trap", "answer": "科学者は合理的思考と専門領域外の信仰を区別すべきだ。", "gold": "incorrect", "goldReason": "語句は重なるが、合理的思考を領域外にも貫くとは述べていない。"},
+        {"id": "q1_irrelevant", "answer": "科学者は研究成果を社会の目的に合わせて活用すべきだ。", "gold": "incorrect", "goldReason": "本文周辺の話題らしいが、設問の中心意味に答えていない。"},
+        {"id": "q1_over_limit", "answer": "科学者は専門分野で身につけた合理的な思考を、専門分野の外のあらゆる場面でも徹底して貫くべきだ。", "gold": "incorrect", "goldReason": "意味は正しいが40字を超える。"}
+      ]
+    },
+    {
+      "id": "2024-2-6",
+      "points": 10,
+      "answerFormat": "parts",
+      "parts": [
+        {"id": "甲", "points": 5, "maxChars": 10, "requiredMeaning": "士官である自分が戦争の責任を負う立場だという認識"},
+        {"id": "乙", "points": 5, "maxChars": 10, "requiredMeaning": "戦争・特攻の継続をやめようとする意思"}
+      ],
+      "referenceAnswer": {"甲": "戦争の責任を負うべき", "乙": "戦争の継続を諦めよう"},
+      "rubric": {
+        "rules": [
+          "甲と乙を独立に意味で判定する",
+          "各欄は10字以内",
+          "両方が正しければcorrect、一方だけ正しければpartial、両方とも中心意味を欠けばincorrect",
+          "具体的行動だけで、戦争・特攻の継続をやめる意思を表さない乙は不正解",
+          "どちらか一欄でも10字を超えた場合、全体判定はcorrectにしない"
+        ]
+      },
+      "answers": [
+        {"id": "q2_exact", "answer": {"甲": "戦争の責任を負うべき", "乙": "戦争の継続を諦めよう"}, "gold": "correct", "goldPartLabels": {"甲": "correct", "乙": "correct"}, "goldReason": "模範解答と同じ意味で各10字以内。"},
+        {"id": "q2_paraphrase", "answer": {"甲": "戦争責任を担う", "乙": "戦いを終わらせる"}, "gold": "correct", "goldPartLabels": {"甲": "correct", "乙": "correct"}, "goldReason": "両欄とも中心意味を簡潔に言い換えている。"},
+        {"id": "q2_only_a", "answer": {"甲": "責任を負う立場", "乙": "信管を外させよう"}, "gold": "partial", "goldPartLabels": {"甲": "correct", "乙": "incorrect"}, "goldReason": "甲は合うが、乙は具体的行動だけで戦争継続をやめる意思に届かない。"},
+        {"id": "q2_only_b", "answer": {"甲": "責任から逃れたい", "乙": "戦争をやめよう"}, "gold": "partial", "goldPartLabels": {"甲": "incorrect", "乙": "correct"}, "goldReason": "乙は合うが、甲は責任を負う認識と逆である。"},
+        {"id": "q2_position_trap", "answer": {"甲": "責任を負う立場", "乙": "責任のない立場"}, "gold": "partial", "goldPartLabels": {"甲": "correct", "乙": "incorrect"}, "goldReason": "甲は合うが、乙は心情変化の中心を表さない。"},
+        {"id": "q2_action_trap", "answer": {"甲": "責任を取ること", "乙": "信管を外すこと"}, "gold": "partial", "goldPartLabels": {"甲": "correct", "乙": "incorrect"}, "goldReason": "甲は合うが、乙は戦争・特攻の継続を諦める意思を表さない。"},
+        {"id": "q2_reversed", "answer": {"甲": "責任はない", "乙": "戦争を続けよう"}, "gold": "incorrect", "goldPartLabels": {"甲": "incorrect", "乙": "incorrect"}, "goldReason": "両欄とも模範解答の意味と逆である。"},
+        {"id": "q2_over_limit", "answer": {"甲": "自分が戦争責任を負うべきだ", "乙": "これ以上の戦争継続は諦めよう"}, "gold": "incorrect", "goldPartLabels": {"甲": "incorrect", "乙": "incorrect"}, "goldReason": "意味は近いが両欄とも10字を超える。"}
+      ]
+    }
+  ]
+}

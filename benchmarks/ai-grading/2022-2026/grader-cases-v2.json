@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 2,
+  "benchmark": "waseshibu-kokugo-grader-five-year",
+  "years": [2022, 2023, 2024, 2025, 2026],
+  "evaluationPolicy": {
+    "scoreStatus": "reference_only",
+    "officialPartialCreditPublished": false,
+    "expectedLabels": "Clear benchmark cases derived from official questions and model answers. Exact AI reference scores are not treated as official gold scores.",
+    "labels": ["correct", "partial", "incorrect"]
+  },
+  "questions": [
+    {
+      "id": "2022-2-6",
+      "year": 2022,
+      "question": "波線部「嫌でたまらない」とあるが、どのようなことが「嫌」なのか。本文全体を踏まえて、六十五字以内で説明しなさい。",
+      "source": {
+        "questionUrl": "https://www.waseda-shibuya.edu.sg/assets/upload/files/14ca1d8a2a3cfdfac702153e1ae955c61652423118.pdf",
+        "answerAsset": "content/public-v2-c76dbc7571ed29a3/assets/3dfd661332ca3b6f04c3cedd2f05797a.webp"
+      },
+      "maxScore": 12,
+      "answerFormat": "single",
+      "referenceAnswer": "失恋の痛みや自分自身の記録不振による焦りから、純粋な友情を注いでくれているはずの湊の気持ちを素直に受け入れられないこと。",
+      "answerRationale": {
+        "essentialMeanings": [
+          "失恋の痛みを抱えている",
+          "自分の記録不振への焦りがある",
+          "湊の純粋な友情・気遣いを素直に受け入れられない"
+        ],
+        "requiredRelations": [
+          "失恋の痛みと記録不振への焦りが原因となり、湊の友情を受け入れられない"
+        ]
+      },
+      "constraints": {"maxChars": 65, "requiredWords": []},
+      "answers": [
+        {
+          "id": "2022_exact",
+          "answer": "失恋の痛みや自分自身の記録不振による焦りから、純粋な友情を注いでくれているはずの湊の気持ちを素直に受け入れられないこと。",
+          "expectedVerdict": "correct"
+        },
+        {
+          "id": "2022_partial",
+          "answer": "失恋の痛みで心に余裕がなく、湊の気遣いを素直に受け入れられないこと。",
+          "expectedVerdict": "partial"
+        },
+        {
+          "id": "2022_incorrect",
+          "answer": "恋敵の湊に練習方法を否定され、友情を裏切られたと感じたこと。",
+          "expectedVerdict": "incorrect"
+        }
+      ]
+    },
+    {
+      "id": "2023-2-2",
+      "year": 2023,
+      "question": "傍線部「ともよは、こういう湊を見るのは、あまり好かなかった」とあるが、それはなぜか。「理想」という語を必ず用いて、次の形式に合うように、四十字以内で説明しなさい。",
+      "source": {
+        "questionUrl": "https://www.waseda-shibuya.edu.sg/assets/upload/files/68610b0326f6a7484a359469430df3a21684835423.pdf",
+        "answerUrl": "https://www.waseda-shibuya.edu.sg/assets/upload/files/bd0436c90ae46f2ff940d7d84e9f4b031684835438.pdf"
+      },
+      "maxScore": 10,
+      "answerFormat": "single",
+      "answerFrame": {
+        "prefix": "湊に不思議な魅力を感じていたともよにとっては、",
+        "suffix": "から。"
+      },
+      "referenceAnswer": "周囲の客に愛想よく振る舞う湊の姿は、ともよの理想とする姿ではなかった",
+      "answerRationale": {
+        "essentialMeanings": [
+          "湊が周囲の客に愛想よく振る舞っている",
+          "その姿がともよの理想とする湊の姿ではない"
+        ],
+        "requiredRelations": [
+          "湊の社交的な振る舞いと、ともよの理想とのずれ"
+        ]
+      },
+      "constraints": {"maxChars": 40, "requiredWords": ["理想"]},
+      "answers": [
+        {
+          "id": "2023_exact",
+          "answer": "周囲の客に愛想よく振る舞う湊の姿は、ともよの理想とする姿ではなかった",
+          "expectedVerdict": "correct"
+        },
+        {
+          "id": "2023_partial_format",
+          "answer": "周囲の客に愛想よく振る舞う姿が、自分の思う湊らしくなかった",
+          "expectedVerdict": "partial"
+        },
+        {
+          "id": "2023_incorrect",
+          "answer": "湊が周囲の客を冷たく見下し、ともよの理想と正反対だった",
+          "expectedVerdict": "incorrect"
+        }
+      ]
+    },
+    {
+      "id": "2024-2-6",
+      "year": 2024,
+      "question": "本文中の心情変化を整理した図の空欄甲・乙を、それぞれ十字以内で補いなさい。",
+      "source": {
+        "questionUrl": "https://www.waseda-shibuya.edu.sg/assets/upload/files/e84fc32c4eac71d3616a4743a3bf47eb1712047203.pdf",
+        "answerUrl": "https://www.waseda-shibuya.edu.sg/assets/upload/files/240b8b7e02b0b6bb356bdd339d8b5b071712047213.pdf"
+      },
+      "maxScore": 10,
+      "answerFormat": "parts",
+      "parts": [
+        {"id": "甲", "maxScore": 5, "maxChars": 10},
+        {"id": "乙", "maxScore": 5, "maxChars": 10}
+      ],
+      "referenceAnswer": {"甲": "戦争の責任を負うべき", "乙": "戦争の継続を諦めよう"},
+      "answerRationale": {
+        "parts": {
+          "甲": {"essentialMeanings": ["士官である自分が戦争の責任を負うべきだという認識"]},
+          "乙": {"essentialMeanings": ["戦争・特攻の継続をやめようとする意思"]}
+        },
+        "requiredRelations": ["甲と乙を独立に判定する"]
+      },
+      "constraints": {"requiredWords": []},
+      "answers": [
+        {
+          "id": "2024_exact",
+          "answer": {"甲": "戦争の責任を負うべき", "乙": "戦争の継続を諦めよう"},
+          "expectedVerdict": "correct",
+          "expectedPartVerdicts": {"甲": "correct", "乙": "correct"}
+        },
+        {
+          "id": "2024_partial",
+          "answer": {"甲": "戦争責任を担う", "乙": "信管を外させよう"},
+          "expectedVerdict": "partial",
+          "expectedPartVerdicts": {"甲": "correct", "乙": "partial"}
+        },
+        {
+          "id": "2024_incorrect",
+          "answer": {"甲": "責任はない", "乙": "戦争を続けよう"},
+          "expectedVerdict": "incorrect",
+          "expectedPartVerdicts": {"甲": "incorrect", "乙": "incorrect"}
+        }
+      ]
+    },
+    {
+      "id": "2025-1-6",
+      "year": 2025,
+      "question": "「客観性」のさらなる段階について、空欄X・Yを指定された形式で、それぞれ二十字以内で補いなさい。",
+      "source": {
+        "questionUrl": "https://www.waseda-shibuya.edu.sg/assets/upload/files/27311eb93597762810ef75882575d3b71744685599.pdf",
+        "answerUrl": "https://www.waseda-shibuya.edu.sg/assets/upload/files/8270be7ac627938f7bf6407e07f347891744685608.pdf"
+      },
+      "maxScore": 12,
+      "answerFormat": "parts",
+      "answerFrame": {
+        "template": "個々の対象の性質を{X}が客観性だという考え方から、{Y}が客観性だという考え方に変わっていった。"
+      },
+      "parts": [
+        {"id": "X", "maxScore": 6, "maxChars": 20, "requiredForm": "……によって……すること"},
+        {"id": "Y", "maxScore": 6, "maxChars": 20, "requiredForm": "……に……を見出すこと"}
+      ],
+      "referenceAnswer": {"X": "機械によって正確に測定すること", "Y": "対象間に整合性のある法則を見出すこと"},
+      "answerRationale": {
+        "parts": {
+          "X": {"essentialMeanings": ["機械を用いる", "個々の対象を正確に測定する"]},
+          "Y": {"essentialMeanings": ["対象同士の間に整合的な法則を見出す"]}
+        },
+        "requiredRelations": ["個体の測定から、対象間の関係・法則へ客観性の中心が移る"]
+      },
+      "constraints": {"requiredWords": []},
+      "answers": [
+        {
+          "id": "2025_exact",
+          "answer": {"X": "機械によって正確に測定すること", "Y": "対象間に整合性のある法則を見出すこと"},
+          "expectedVerdict": "correct",
+          "expectedPartVerdicts": {"X": "correct", "Y": "correct"}
+        },
+        {
+          "id": "2025_partial",
+          "answer": {"X": "機械によって正確に測定すること", "Y": "対象に客観性を見出すこと"},
+          "expectedVerdict": "partial",
+          "expectedPartVerdicts": {"X": "correct", "Y": "partial"}
+        },
+        {
+          "id": "2025_incorrect",
+          "answer": {"X": "人間によって想像すること", "Y": "個人に好みを見出すこと"},
+          "expectedVerdict": "incorrect",
+          "expectedPartVerdicts": {"X": "incorrect", "Y": "incorrect"}
+        }
+      ]
+    },
+    {
+      "id": "2026-2-4",
+      "year": 2026,
+      "question": "「私はひそかに苦笑していた」ときの「私」の説明となるように、空欄X・Yを補いなさい。Xは十字以内、Yは三字以内。",
+      "source": {
+        "questionUrl": "https://www.waseda-shibuya.edu.sg/assets/upload/files/810322707a95b6eeeb58d62e2b94970d1776421945.pdf",
+        "answerUrl": "https://www.waseda-shibuya.edu.sg/assets/upload/files/3e428cf9e07c3440479d49ea6deed3801776421958.pdf"
+      },
+      "maxScore": 9,
+      "answerFormat": "parts",
+      "answerFrame": {
+        "template": "「私」は故郷の家族の{X}様子に触れ、それと対照的な自分自身に苦々しさを覚えた。これは、自分と家族を比較するという、{Y}な視点に立っている、と見ることができる。"
+      },
+      "parts": [
+        {"id": "X", "maxChars": 10},
+        {"id": "Y", "maxChars": 3}
+      ],
+      "referenceAnswer": {"X": "温かみと品位あふれる", "Y": "客観的"},
+      "answerRationale": {
+        "parts": {
+          "X": {"essentialMeanings": ["故郷の家族には温かみがある", "故郷の家族には品位がある"]},
+          "Y": {"essentialMeanings": ["自分と家族を客観的に比較している"]}
+        },
+        "requiredRelations": ["家族の温かみ・品位と自分を客観的に対比する"]
+      },
+      "constraints": {"requiredWords": []},
+      "answers": [
+        {
+          "id": "2026_exact",
+          "answer": {"X": "温かみと品位あふれる", "Y": "客観的"},
+          "expectedVerdict": "correct",
+          "expectedPartVerdicts": {"X": "correct", "Y": "correct"}
+        },
+        {
+          "id": "2026_partial",
+          "answer": {"X": "温かみのある", "Y": "客観的"},
+          "expectedVerdict": "partial",
+          "expectedPartVerdicts": {"X": "partial", "Y": "correct"}
+        },
+        {
+          "id": "2026_incorrect",
+          "answer": {"X": "冷淡で粗野な", "Y": "主観的"},
+          "expectedVerdict": "incorrect",
+          "expectedPartVerdicts": {"X": "incorrect", "Y": "incorrect"}
+        }
+      ]
+    }
+  ]
+}
