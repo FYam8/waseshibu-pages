@@ -8,6 +8,12 @@
     "check": "wrangler deploy --dry-run",
     "deploy": "wrangler deploy"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd"
+    ]
+  },
   "devDependencies": {
     "wrangler": "^4.133.0"
   }
